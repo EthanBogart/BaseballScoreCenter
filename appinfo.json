@@ -1,0 +1,71 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "mr bernke",
+    "longName": "Baseball Score Center",
+    "projectType": "pebblejs",
+    "resources": {
+        "media": [
+            {
+                "file": "images/menu_icon.png",
+                "menuIcon": true,
+                "name": "IMAGE_MENU_ICON",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/logo_splash.png",
+                "name": "IMAGE_LOGO_SPLASH",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/tile_splash.png",
+                "name": "IMAGE_TILE_SPLASH",
+                "type": "bitmap"
+            },
+            {
+                "file": "fonts/UbuntuMono-Regular.ttf",
+                "name": "MONO_FONT_14",
+                "type": "font"
+            },
+            {
+                "file": "images/base-empty.png",
+                "name": "IMAGES_BASE_EMPTY_PNG",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/base-full.png",
+                "name": "IMAGES_BASE_FULL_PNG",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/action_bar_icon_check.png",
+                "name": "IMAGES_ACTION_BAR_ICON_CHECK_PNG",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/action_bar_icon_down.png",
+                "name": "IMAGES_ACTION_BAR_ICON_DOWN_PNG",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/action_bar_icon_up.png",
+                "name": "IMAGES_ACTION_BAR_ICON_UP_PNG",
+                "type": "bitmap"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "BaseballSC",
+    "targetPlatforms": [
+        "chalk"
+    ],
+    "uuid": "242527ec-21b8-4d35-b7ad-c77ff18b3920",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "hiddenApp": false,
+        "watchface": false
+    }
+}
