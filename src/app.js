@@ -894,6 +894,9 @@ function gameSort (a,b) {
 		return 1;
 	}
 	
+	var aTime = getDateObj(a).getTime();
+	var bTime = getDateObj(b).getTime();
+	
 	if (a.status.status !== b.status.status) {
 		if (a.status.status === 'In Progress') {
 			return -1;
@@ -905,9 +908,9 @@ function gameSort (a,b) {
 			return -1;
 		}
 	}
-	
-	var aTime = getDateObj(a).getTime();
-	var bTime = getDateObj(b).getTime();
+	else if (a.status.status === 'In Progress') {
+		return bTime - aTime;
+	}
 	return aTime - bTime;
 }
 
