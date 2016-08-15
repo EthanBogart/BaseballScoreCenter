@@ -8,6 +8,7 @@ var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
 var Settings = require('settings');
+var Platform = require('platform');
 var Clay = require('clay');
 var clayConfig = require('config');
 var clay = new Clay(clayConfig);
@@ -265,9 +266,7 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 			// set interval
       if (!refreshInterval) {
 				refreshInterval = setInterval(intervalRefresh,timeToRefresh);
-				console.log('Interval Set!');
 			}
-			else {console.log('Interval already set!');}
     },
     function(error) {
 			UI.Vibe.vibrate('double');
@@ -560,9 +559,13 @@ function getBlurb (data) {
 
 function drawGame (game) {
 	var elementList = [];
+	var adjuster = 180;
+	if (Platform.version() === 'basalt' || Platform.version() === 'aplite') {
+		adjuster = 144;
+	}
 	
 	var stateText = new UI.Text({
-		position: new Vector2(14, 60),
+		position: new Vector2(14 * (adjuster/180), 60),
 		size: new Vector2(180, 180),
 		font: 'gothic-18-bold',
 		text: 'B:\nS:\nO:\n',
@@ -575,14 +578,14 @@ function drawGame (game) {
 	var scoreLine = new UI.Line({
 		strokeColor: 'black',
 		strokeWidth: 1,
-		position: new Vector2(89,20),
+		position: new Vector2(89 * (adjuster/180),20),
 		position2: new Vector2(89,58),
 		backgroundColor: 'white'
 	});
 	elementList.push(scoreLine);
 
 	var awayName = new UI.Text({
-		position: new Vector2(-8, 10),
+		position: new Vector2(-8 * (adjuster/180), 10),
 		size: new Vector2(90, 24),
 		font: 'gothic-24-bold',
 		text: game.away,
@@ -593,7 +596,7 @@ function drawGame (game) {
 	elementList.push(awayName);
 
 	var homeName = new UI.Text({
-		position: new Vector2(98, 10),
+		position: new Vector2(98 * (adjuster/180), 10),
 		size: new Vector2(90, 24),
 		font: 'gothic-24-bold',
 		text: game.home,
@@ -604,7 +607,7 @@ function drawGame (game) {
 	
 	var awayScore = new UI.Text({
 		clear: true,
-		position: new Vector2(-8, 38),
+		position: new Vector2(-8 * (adjuster/180), 38),
 		size: new Vector2(90, 20),
 		font: 'leco-20-bold-numbers',
 		text: game.awayScore,
@@ -616,7 +619,7 @@ function drawGame (game) {
 
 	var homeScore = new UI.Text({
 		clear: true,
-		position: new Vector2(98, 38),
+		position: new Vector2(98 * (adjuster/180), 38),
 		size: new Vector2(90, 20),
 		font: 'leco-20-bold-numbers',
 		text: game.homeScore,
@@ -628,7 +631,7 @@ function drawGame (game) {
 	
 	var timeText = new UI.TimeText({
 		text: '%I:%M',
-		size: new Vector2(180, 16),
+		size: new Vector2(180 * (adjuster/180), 16),
 		position: new Vector2(0, 2),
 		textAlign: 'center',
 		color: 'black',
@@ -641,7 +644,7 @@ function drawGame (game) {
 		var bcolor = (ball < parseInt(game.status.b)) ? 'blue' : 'white';
 		var ballCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2(36 + (16*ball), 72),
+			position: new Vector2((36 + (16*ball)) * (adjuster/180), 72),
 			radius: 6,
 			backgroundColor: bcolor,
 			borderColor: 'black',
@@ -654,7 +657,7 @@ function drawGame (game) {
 		var scolor = (strike < parseInt(game.status.s)) ? 'red' : 'white';
 		var strikeCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2(36 + (16*strike), 90),
+			position: new Vector2((36 + (16*strike)) * (adjuster/180), 90),
 			radius: 6,
 			backgroundColor: scolor,
 			borderColor: 'black',
@@ -667,7 +670,7 @@ function drawGame (game) {
 		var ocolor = (out < parseInt(game.status.o)) ? '#00AA00' : 'white';
 		var outCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2(36 + (16*out), 108),
+			position: new Vector2((36 + (16*out)) * (adjuster/180), 108),
 			radius: 6,
 			backgroundColor: ocolor,
 			borderColor: 'black',
@@ -680,7 +683,7 @@ function drawGame (game) {
 	
 	var baseOne = runners['1B'] ? 'full' : 'empty';
 	var baseImage1 = new UI.Image({
-		position: new Vector2(152,96),
+		position: new Vector2(152 * (adjuster/180),96),
 		size: new Vector2(10,10),
 		image: 'images/base-' + baseOne + '.png'
 	});
@@ -688,7 +691,7 @@ function drawGame (game) {
 
 	var baseTwo = runners['2B'] ? 'full' : 'empty';
 	var baseImage2 = new UI.Image({
-		position: new Vector2(128,72),
+		position: new Vector2(128 * (adjuster/180),72),
 		size: new Vector2(10,10),
 		image: 'images/base-' + baseTwo + '.png'
 	});
@@ -696,7 +699,7 @@ function drawGame (game) {
 
 	var baseThree = runners['3B'] ? 'full' : 'empty';
 	var baseImage3 = new UI.Image({
-		position: new Vector2(104,96),
+		position: new Vector2(104 * (adjuster/180),96),
 		size: new Vector2(10,10),
 		image: 'images/base-' + baseThree + '.png'
 	});
@@ -704,7 +707,7 @@ function drawGame (game) {
 
 	var pText = new UI.Text({
 		position: new Vector2(0, 116),
-		size: new Vector2(180, 14),
+		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
 		text: 'P: ' + game.attributes.pitcherDisplay,
 		color: 'black',
@@ -715,7 +718,7 @@ function drawGame (game) {
 
 	var bText = new UI.Text({
 		position: new Vector2(0, 132),
-		size: new Vector2(180, 14),
+		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
 		text: 'B: ' + game.attributes.batterDisplay,
 		color: 'black',
@@ -727,7 +730,7 @@ function drawGame (game) {
 	var inning = game.inningState + ' ' + game.inning;
 	var iText = new UI.Text({
 		position: new Vector2(0, 148),
-		size: new Vector2(180, 14),
+		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
 		text: inning,
 		color: 'black',
