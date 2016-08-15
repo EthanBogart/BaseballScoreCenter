@@ -370,14 +370,19 @@ function getGame(games, index) {
   else if (status.status === 'Final' || status.status === 'Game Over') {
     // Winning pitcher
     var wp = game.winning_pitcher;
-    var wpName = wp.first + ' ' + wp.last;
-    var wpStats = wp.wins + '-' + wp.losses + ', ' + wp.era + ' ERA';
+    var wpName = wp.name_display_roster;
+    var wpStats = wp.wins + '-' + wp.losses + ', ' + wp.era;
     
     // Losing pitcher
     var lp = game.losing_pitcher;
-    var lpName = lp.first + ' ' + lp.last;
-    var lpStats = lp.wins + '-' + lp.losses + ', ' + lp.era + ' ERA';
+    var lpName = lp.name_display_roster;
+    var lpStats = lp.wins + '-' + lp.losses + ', ' + lp.era;
     
+		// Save pitcher
+		var sp = game.save_pitcher;
+		var spName = sp.name_display_roster;
+    var spStats = sp.wins + '-' + sp.losses + ', ' + sp.era;
+		
     gameAttributes = {
       wp: {
         name: wpName,
@@ -386,7 +391,11 @@ function getGame(games, index) {
       lp: {
         name: lpName,
         stats: lpStats
-      }
+      },
+			sp: {
+				name: spName,
+				stats: spStats
+			}
     };
   }
   
@@ -450,7 +459,7 @@ function getGame(games, index) {
 function getPitcherObj (pitcher) {
 	// Winning pitcher
 	var name = pitcher.first + ' ' + pitcher.last;
-	var stats = pitcher.wins + '-' + pitcher.losses + ', ' + pitcher.era + ' ERA';
+	var stats = pitcher.wins + '-' + pitcher.losses + ', ' + pitcher.era;
 
 	return {
 		name: name,
@@ -802,7 +811,11 @@ function showGame (game, viewState) {
     else if (game.gameState === 'Final' || game.gameState === 'Game Over') {
       var winner = attributes.wp;
       var loser = attributes.lp;
-      gameText = 'WP: ' + winner.name + '\n (' + winner.stats + ')\n' + 'LP: ' + loser.name + '\n (' + loser.stats + ')';
+			var saver = attributes.sp;
+      gameText = 'W: ' + winner.name + ' (' + winner.stats + ')\nL: ' + loser.name + ' (' + loser.stats + ')';
+			if (saver.name !== '') {
+				gameText = gameText + '\nS: ' + saver.name + ' (' + saver.stats + ')';
+			}
     }
 		else if (game.gameState === 'Preview') {
 			hpp = attributes.hpp;
@@ -814,7 +827,7 @@ function showGame (game, viewState) {
 			hpp = attributes.hpp;
 			app = attributes.app;
 			subtitle = game.gameState + ' - ' + attributes.reason;
-			style = 'large';
+			style = 'classic-small';
 		}
   }
   
