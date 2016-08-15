@@ -7,18 +7,43 @@
 var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
+var Settings = require('settings');
 var Clay = require('clay');
-var clayConfig = require('config.json');
+var clayConfig = require('config');
 var clay = new Clay(clayConfig);
 
+Pebble.addEventListener('showConfiguration', function(e) {
+  Pebble.openURL(clay.generateUrl());
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+  if (e && !e.response) {
+    return;
+  }
+  var dict = clay.getSettings(e.response);
+
+  Settings.option(dict);
+});
+
+var settings = Settings.state.options;
 var selectedDate = new Date();
 var gameMenu;
 var gameCard;
-var FAVORITE_TEAM_IDENTIFIER = 'ATL'; // Eg ATL, SEA, MI
+var identifierKeys = ['favTeam1', 'favTeam2', 'favTeam3']; // Don't judge me, this makes things easier to read
+var FAVORITE_TEAM_IDENTIFIERS = []; // Eg ATL, SEA, MI
+
+for (var keyIndex in identifierKeys) {
+	var key = identifierKeys[keyIndex];
+	var choice = settings[key];
+	if (choice !== '') {
+		FAVORITE_TEAM_IDENTIFIERS.push(choice);
+	}
+}
+
 var refreshInterval;
 var isStartup = true;
 var isBlurbView = false;
-var timeToRefresh = 20000;
+var timeToRefresh = settings.refreshRate * 1000;
 
 var main = new UI.Card({
 	title: 'Score Center',
@@ -893,11 +918,15 @@ function showGame (game, viewState) {
 }
 
 function gameSort (a,b) {
-	if (a.away_name_abbrev === FAVORITE_TEAM_IDENTIFIER || a.home_name_abbrev === FAVORITE_TEAM_IDENTIFIER) {
-		return -1;
-	}
-	else if (b.away_name_abbrev === FAVORITE_TEAM_IDENTIFIER || b.home_name_abbrev === FAVORITE_TEAM_IDENTIFIER) {
-		return 1;
+
+	for (var teamIndex in FAVORITE_TEAM_IDENTIFIERS) {
+		var identifier = FAVORITE_TEAM_IDENTIFIERS[teamIndex];
+		if (a.away_name_abbrev === identifier || a.home_name_abbrev === identifier) {
+			return -1;
+		}
+		else if (b.away_name_abbrev === identifier || b.home_name_abbrev === identifier) {
+			return 1;
+		}
 	}
 	
 	var aTime = getDateObj(a).getTime();

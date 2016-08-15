@@ -3,7 +3,12 @@ module.exports = [
     "type": "heading", 
     "defaultValue": "Score Center Settings",
 		"size": 1
-  }, 
+  },
+	{
+		"type": "heading",
+		"defaultValue": "You will need to restart the app for the changes to come into effect.",
+		"size": 5
+	},
   { 
 		"type": "section",
 		"items": [
@@ -13,12 +18,12 @@ module.exports = [
 			},
 			{
 				"type": "text",
-				"defaultValue": "Favorite teams will be put at the top of your scoreboard."
+				"defaultValue": "Favorite teams will be put at the top of your scoreboard (all optional)."
 			},
 			{
 				"type": "select",
 				"appKey": "favTeam1",
-				"label": "First favorite (optional)",
+				"label": "First favorite",
 				"options": [
 					{
 						"label": "",
@@ -75,7 +80,8 @@ module.exports = [
 					{
 						"label": "LAA",
 						"value": "LAA"
-					},{
+					},
+					{
 						"label": "LAD",
 						"value": "LAD"
 					},
@@ -148,7 +154,7 @@ module.exports = [
 			{
 				"type": "select",
 				"appKey": "favTeam2",
-				"label": "Second favorite (optional)",
+				"label": "Second favorite",
 				"options": [
 					{
 						"label": "",
@@ -205,7 +211,8 @@ module.exports = [
 					{
 						"label": "LAA",
 						"value": "LAA"
-					},{
+					},
+					{
 						"label": "LAD",
 						"value": "LAD"
 					},
@@ -278,7 +285,7 @@ module.exports = [
 			{
 				"type": "select",
 				"appKey": "favTeam3",
-				"label": "Third favorite (optional)",
+				"label": "Third favorite",
 				"options": [
 					{
 						"label": "",
@@ -335,7 +342,8 @@ module.exports = [
 					{
 						"label": "LAA",
 						"value": "LAA"
-					},{
+					},
+					{
 						"label": "LAD",
 						"value": "LAD"
 					},
