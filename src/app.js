@@ -44,6 +44,7 @@ var refreshInterval;
 var isStartup = true;
 var isBlurbView = false;
 var timeToRefresh = settings.refreshRate * 1000;
+var scoreKey = '';
 
 var main = new UI.Card({
 	title: 'Score Center',
@@ -895,6 +896,14 @@ function showGame (game, viewState) {
 	gameCard.blurbCard = blurbCard;
 	gameCard.menuIndex = game.index;
 	
+	var gameCardScoreKey = game.homeScore + '-' + game.awayScore;
+	if (scoreKey === '') {
+		scoreKey = game.homeScore + '-' + game.awayScore;
+	}
+	else if (gameCardScoreKey !== scoreKey) {
+		UI.Vibe.vibrate('short');
+	}
+	
 	gameCard.on('longClick', 'select', function () {
 		refreshGame(game.UID, gameCard);
 	});
@@ -926,6 +935,7 @@ function showGame (game, viewState) {
 		gameMenu.show();
 		gameCard.hide();
 		gameCard.isBeingViewed = false;
+		scoreKey = '';
 	});
 	
 
