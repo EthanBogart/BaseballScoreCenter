@@ -841,7 +841,7 @@ function showGame (game, viewState) {
   
 	if (game.hasStarted) {
 		subtitle = game.awayScore + ' - ' + game.homeScore; 
-		if (game.gameState === 'Final' || game.gameState === 'Final') {
+		if (game.gameState === 'Final' || game.gameState === 'Game Over') {
 			var extras = parseFloat(game.inning) > 9 ? ('/' + game.inning) : '';
 			subtitle = subtitle + ' (Final' + extras + ')';
 		}
