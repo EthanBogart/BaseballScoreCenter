@@ -329,11 +329,13 @@ function getGame(games, index) {
   if (status.status === 'In Progress') {
     // Batter
     var batter = game.batter;
+		var batterDisplay = batter.name_display_roster;
     var batterName = batter.first + ' ' + batter.last;
     var batterStats = batter.avg + '/' + batter.obp + '/' + batter.slg;
     
     // Pitcher
     var pitcher = game.pitcher;
+		var pitcherDisplay = pitcher.name_display_roster;
     var pitcherName = pitcher.first + ' ' + pitcher.last;
     var pitcherStats = pitcher.wins + '-' + pitcher.losses + ', ' + pitcher.era;
 		
@@ -359,8 +361,10 @@ function getGame(games, index) {
 		}
     
     gameAttributes = {
+			batterDisplay: batterDisplay,
       batterName: batterName,
       batterStats: batterStats,
+			pitcherDisplay: pitcherDisplay,
       pitcherName: pitcherName,
       pitcherStats: pitcherStats,
 			runners: runners
@@ -698,31 +702,31 @@ function drawGame (game) {
 	});
 	elementList.push(baseImage3);
 
-		var lpText = new UI.Text({
+	var pText = new UI.Text({
+		position: new Vector2(0, 116),
+		size: new Vector2(180, 14),
+		font: 'gothic-14',
+		text: 'P: ' + game.attributes.pitcherDisplay,
+		color: 'black',
+		textAlign: 'center',
+		backgroundColor: 'white'
+	});
+	elementList.push(pText);
+
+	var bText = new UI.Text({
 		position: new Vector2(0, 132),
 		size: new Vector2(180, 14),
 		font: 'gothic-14',
-		text: 'Last Play: up',
+		text: 'B: ' + game.attributes.batterDisplay,
 		color: 'black',
 		textAlign: 'center',
 		backgroundColor: 'white'
 	});
-	elementList.push(lpText);
-
-	var mText = new UI.Text({
-		position: new Vector2(0, 148),
-		size: new Vector2(180, 14),
-		font: 'gothic-14',
-		text: 'Matchup: down',
-		color: 'black',
-		textAlign: 'center',
-		backgroundColor: 'white'
-	});
-	elementList.push(mText);
+	elementList.push(bText);
 	
 	var inning = game.inningState + ' ' + game.inning;
 	var iText = new UI.Text({
-		position: new Vector2(0, 116),
+		position: new Vector2(0, 148),
 		size: new Vector2(180, 14),
 		font: 'gothic-14',
 		text: inning,
