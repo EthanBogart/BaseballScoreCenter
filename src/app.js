@@ -861,6 +861,11 @@ function showGame (game, viewState) {
 		gameCard.viewState = 'GameView';
 	});
 	
+	matchup.on('click', 'back', function () {
+		gameCard.show();
+		matchup.hide();
+		gameCard.viewState = 'GameView';
+	});
 
 	var pbpCard = new UI.Card({
 		title: 'Last Play',
@@ -872,6 +877,12 @@ function showGame (game, viewState) {
 	});
 
 	pbpCard.on('click', 'down', function () {
+		gameCard.show();
+		pbpCard.hide();
+		gameCard.viewState = 'GameView';
+	});
+	
+	pbpCard.on('click', 'back', function () {
 		gameCard.show();
 		pbpCard.hide();
 		gameCard.viewState = 'GameView';
