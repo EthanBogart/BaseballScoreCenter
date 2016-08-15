@@ -14,7 +14,7 @@ var FAVORITE_TEAM_IDENTIFIER = 'ATL'; // Eg ATL, SEA, MI
 var refreshInterval;
 var isStartup = true;
 var isBlurbView = false;
-var timeToRefresh = 20000;
+var timeToRefresh = 5000;
 
 var main = new UI.Card({
 	title: 'Score Center',
@@ -800,7 +800,6 @@ function showGame (game, viewState) {
 	});
 
 	matchup.on('click', 'up', function () {
-		gameCard.show();
 		matchup.hide();
 		gameCard.viewState = 'GameView';
 	});
@@ -813,7 +812,6 @@ function showGame (game, viewState) {
 	});
 
 	pbpCard.on('click', 'down', function () {
-		gameCard.show();
 		pbpCard.hide();
 		gameCard.viewState = 'GameView';
 	});
