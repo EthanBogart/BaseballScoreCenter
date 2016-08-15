@@ -7,6 +7,10 @@
 var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
+var Clay = require('clay');
+var clayConfig = require('config.json');
+var clay = new Clay(clayConfig);
+
 var selectedDate = new Date();
 var gameMenu;
 var gameCard;
@@ -841,6 +845,7 @@ function showGame (game, viewState) {
 	gameCard.on('click', 'up', function () {
 		if (game.pbpText) {
 			pbpCard.show();
+			gameCard.hide();
 			gameCard.viewState = 'PBPView';
 		}
 	});
@@ -848,6 +853,7 @@ function showGame (game, viewState) {
 	gameCard.on('click', 'down', function () {
 			if (matchupText) {
 				matchup.show();
+				gameCard.hide();
 				gameCard.viewState = 'MatchupView';
 			}
 	});
