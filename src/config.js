@@ -420,7 +420,7 @@ module.exports = [
 		"appKey": "refreshRate",
 		"defaultValue": 30,
 		"label": "Refresh rate (seconds)",
-		"min": 10,
+		"min": 5,
 		"max": 120,
 		"description": "Remember: higher refresh rates may increase battery usage. You can also hold select while viewing a game to refresh manually."
 	},
