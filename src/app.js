@@ -48,7 +48,10 @@ var timeToRefresh = settings.refreshRate * 1000;
 var main = new UI.Card({
 	title: 'Score Center',
 	subtitle: 'Loading...',
-  body: 'If games fail to load, hold select to retry'
+  body: 'If games fail to load, hold select to retry',
+	status: {
+		separator: 'none'
+	}
 });
 
 main.on('longClick', 'select', function () {
@@ -143,7 +146,11 @@ function showMenu (games, itemIndex) {
 	
 	gameMenu = new UI.Menu({
 		sections: [menuList],
-		games: games
+		games: games,
+		highlightBackgroundColor: '#0055AA',
+		status: {
+			separator: 'none'
+		}
 	});
 	
 	if (typeof itemIndex !== 'undefined') {
@@ -758,7 +765,10 @@ function showGame (game, viewState) {
 					title: blurbTitle,
 					body: blurbText,
 					scrollable: true,
-					style: 'small'
+					style: 'small',
+					status: {
+						separator: 'none'
+					}
 				});
 
 				blurbCard.on('click', 'back', function () {
@@ -825,7 +835,10 @@ function showGame (game, viewState) {
 	var matchup = new UI.Card({
 		title: 'Matchup',
 		body: matchupText,
-		style: style
+		style: style,
+		status: {
+			separator: 'none'
+		}
 	});
 
 	matchup.on('click', 'up', function () {
@@ -838,7 +851,10 @@ function showGame (game, viewState) {
 	var pbpCard = new UI.Card({
 		title: 'Last Play',
 		body: game.pbpText,
-		style: 'small'
+		style: 'small',
+		status: {
+			separator: 'none'
+		}
 	});
 
 	pbpCard.on('click', 'down', function () {
@@ -852,7 +868,10 @@ function showGame (game, viewState) {
 			title: game.away + ' @ ' + game.home,
 			subtitle: subtitle,
 			body: gameText,
-			style: style
+			style: style,
+			status: {
+				separator: 'none'
+			}
 		});
 	}
 	
