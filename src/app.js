@@ -800,6 +800,7 @@ function showGame (game, viewState) {
 	});
 
 	matchup.on('click', 'up', function () {
+		gameCard.show();
 		matchup.hide();
 		gameCard.viewState = 'GameView';
 	});
@@ -812,6 +813,7 @@ function showGame (game, viewState) {
 	});
 
 	pbpCard.on('click', 'down', function () {
+		gameCard.show();
 		pbpCard.hide();
 		gameCard.viewState = 'GameView';
 	});
@@ -839,6 +841,7 @@ function showGame (game, viewState) {
 	gameCard.on('click', 'up', function () {
 		if (game.pbpText) {
 			pbpCard.show();
+			gameCard.hide();
 			gameCard.viewState = 'PBPView';
 		}
 	});
@@ -846,6 +849,7 @@ function showGame (game, viewState) {
 	gameCard.on('click', 'down', function () {
 			if (matchupText) {
 				matchup.show();
+				gameCard.hide();
 				gameCard.viewState = 'MatchupView';
 			}
 	});
