@@ -31,7 +31,8 @@ for (var keyIndex in identifierKeys) {
 var refreshInterval;
 var isStartup = true;
 var isBlurbView = false;
-var timeToRefresh = settings.refreshRate * 1000;
+console.log(settings.refreshRate);
+var timeToRefresh = (settings.refreshRate * 1000) || 30000;
 var scoreKey = '';
 var vibrateDisconnect = false;
 var vibrateScoreChange = false;
@@ -278,6 +279,7 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 			// set interval
       if (!refreshInterval) {
 				refreshInterval = setInterval(intervalRefresh,timeToRefresh);
+				
 			}
 			if (hasDisconnected) {
 				hasDisconnected = false;
