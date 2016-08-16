@@ -419,7 +419,7 @@ module.exports = [
 		"type": "checkboxgroup",
 		"appKey": "vibrateOpts",
 		"label": "Vibrate on:",
-		"defaultValue": ["scoreChange", "disconnect"],
+		"defaultValue": [],
 		"options": [
 			{
 				"label": "Score change (short)",

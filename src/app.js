@@ -566,16 +566,16 @@ function getLocalTime (game) {
 
 // Actually the worst code I've ever written
 // PebbleJS does not provide a DOM parser
-function getBlurb (data) {
-	var spl = data.split('<blurb>');
-	if (spl.length > 1) {
-		var bStart = spl[1];
-		var bspl = bStart.split(']]>');
-		var bracketspl = bspl[0].split('TA[');
-		return bracketspl[1];
-	}
-	return null;
-}
+// function getBlurb (data) {
+// 	var spl = data.split('<blurb>');
+// 	if (spl.length > 1) {
+// 		var bStart = spl[1];
+// 		var bspl = bStart.split(']]>');
+// 		var bracketspl = bspl[0].split('TA[');
+// 		return bracketspl[1];
+// 	}
+// 	return null;
+// }
 
 function drawGame (game) {
 	var elementList = [];
@@ -777,52 +777,52 @@ function drawGame (game) {
 function showGame (game, viewState) {
 	// Immediately run ajax in order to get blurb
 	
-	var blurbText = '';
-	var blurbCard;
-	var blurbTitle;
-	if (game.gameState !== 'In Progress') {
-		ajax(
-			{
-				url: 'http://m.mlb.com/gdcross/' + game.dir + '/gamecenter.xml',
-				type:'xml',
-				async: true
-			},
-			function (data) {
+// 	var blurbText = '';
+// 	var blurbCard;
+// 	var blurbTitle;
+// 	if (game.gameState !== 'In Progress') {
+// 		ajax(
+// 			{
+// 				url: 'http://m.mlb.com/gdcross/' + game.dir + '/gamecenter.xml',
+// 				type:'xml',
+// 				async: true
+// 			},
+// 			function (data) {
 
-				if (data.indexOf('wrap') !== -1) {
-					var spl = data.split('wrap');
-					var blurb = getBlurb(spl[1]);
-					if (blurb) {
-						blurbText = blurb;
-						blurbTitle = 'Game Wrap';
-					}
-				} 
+// 				if (data.indexOf('wrap') !== -1) {
+// 					var spl = data.split('wrap');
+// 					var blurb = getBlurb(spl[1]);
+// 					if (blurb) {
+// 						blurbText = blurb;
+// 						blurbTitle = 'Game Wrap';
+// 					}
+// 				} 
 
-				if (blurbText.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '') === '') {
-					blurbText = getBlurb(data);
-					blurbTitle = 'Game Brief';
-				}
+// 				if (blurbText.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '') === '') {
+// 					blurbText = getBlurb(data);
+// 					blurbTitle = 'Game Brief';
+// 				}
 
-				blurbCard = new UI.Card({
-					title: blurbTitle,
-					body: blurbText,
-					scrollable: true,
-					style: 'small',
-					status: {
-						separator: 'none'
-					}
-				});
+// 				blurbCard = new UI.Card({
+// 					title: blurbTitle,
+// 					body: blurbText,
+// 					scrollable: true,
+// 					style: 'small',
+// 					status: {
+// 						separator: 'none'
+// 					}
+// 				});
 
-				blurbCard.on('click', 'back', function () {
-					gameCard.show();
-					blurbCard.hide();
-					isBlurbView = false;
-				});
-			},
-			function(error) {
-			}
-		);
-	}
+// 				blurbCard.on('click', 'back', function () {
+// 					gameCard.show();
+// 					blurbCard.hide();
+// 					isBlurbView = false;
+// 				});
+// 			},
+// 			function(error) {
+// 			}
+// 		);
+// 	}
 	
 	
   var attributes = game.attributes;
@@ -936,7 +936,7 @@ function showGame (game, viewState) {
 	gameCard.gameState = game.gameState;
 	gameCard.pbpCard = pbpCard;
 	gameCard.matchup = matchup;
-	gameCard.blurbCard = blurbCard;
+	//gameCard.blurbCard = blurbCard;
 	gameCard.menuIndex = game.index;
 	
 	var gameCardScoreKey = game.homeScore + '-' + game.awayScore;
