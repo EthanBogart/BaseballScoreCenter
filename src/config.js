@@ -407,6 +407,17 @@ module.exports = [
 						"value": "WAS"
 					}
 				]
+			},
+			{
+				"type": "checkboxgroup",
+				"appKey": "onlyShowFav",
+				"defaultValue": [],
+				"options": [
+					{
+						"label": "Only show selected favorites -- app restart required after change",
+						"value": "showFav"
+					}
+				],
 			}
 		]
   },

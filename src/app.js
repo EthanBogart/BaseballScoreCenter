@@ -37,6 +37,7 @@ var vibrateDisconnect = false;
 var vibrateScoreChange = false;
 var vibrateGameEnd = false;
 var hasDisconnected = false;
+var onlyShowFavorites = false;
 var gameViewedHasEnded = null;
 
 for (var opt in settings.vibrateOpts) {
@@ -50,7 +51,10 @@ for (var opt in settings.vibrateOpts) {
 		vibrateGameEnd = true;
 	}
 }
-console.log(vibrateScoreChange);
+
+if (settings.onlyShowFav && settings.onlyShowFav.length === 1) {
+	onlyShowFavorites = true;
+}
 
 var main = new UI.Card({
 	title: 'Mr. Baseball',
@@ -231,6 +235,16 @@ function showMenu (games, itemIndex) {
 	
 }
 
+function checkForFavorite(game) {
+	for (var tIndex in FAVORITE_TEAM_IDENTIFIERS) {
+		var favTeam = FAVORITE_TEAM_IDENTIFIERS[tIndex];
+		if (game.home_name_abbrev === favTeam || game.away_name_abbrev === favTeam) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function arrangeGamesForMenu (games) {
 	var menuList = [];
 	
@@ -263,10 +277,18 @@ function arrangeGamesForMenu (games) {
 			subtitleText = getLocalTime(game);
 		}
 		
-		menuList.push({
-			title: titleText,
-			subtitle: subtitleText
-		});	
+		if (onlyShowFavorites && checkForFavorite(game)) {
+			menuList.push({
+				title: titleText,
+				subtitle: subtitleText
+			});
+		}
+		else if (!onlyShowFavorites) {
+			menuList.push({
+				title: titleText,
+				subtitle: subtitleText
+			});
+		}
 	}
 	
 	// Date selector:
