@@ -421,6 +421,10 @@ module.exports = [
 				"value": "scoreChange"
 			},
 			{
+				"label": "Game end (long)",
+				"value": "gameEnd"
+			},
+			{
 				"label": "Disconnect (short double)",
 				"value": "disconnect"
 			}
@@ -430,7 +434,7 @@ module.exports = [
 		"type": "slider",
 		"appKey": "refreshRate",
 		"defaultValue": 30,
-		"label": "Refresh rate (seconds) -- app restart required",
+		"label": "Refresh rate (seconds) -- app restart required after change",
 		"min": 5,
 		"max": 120,
 		"description": "Remember: higher refresh rates may increase battery usage. You can also hold select while viewing a game to refresh manually."

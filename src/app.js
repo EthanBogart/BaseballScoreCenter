@@ -35,7 +35,9 @@ var timeToRefresh = (settings.refreshRate * 1000) || 30000;
 var scoreKey = '';
 var vibrateDisconnect = false;
 var vibrateScoreChange = false;
+var vibrateGameEnd = false;
 var hasDisconnected = false;
+var gameViewedHasEnded = null;
 
 for (var opt in settings.vibrateOpts) {
 	if (settings.vibrateOpts[opt] === 'disconnect') {
@@ -43,6 +45,9 @@ for (var opt in settings.vibrateOpts) {
 	}
 	else if (settings.vibrateOpts[opt] === 'scoreChange') {
 		vibrateScoreChange = true;
+	}
+	else if (settings.vibrateOpts[opt] === 'gameEnd') {
+		vibrateGameEnd = true;
 	}
 }
 console.log(vibrateScoreChange);
@@ -75,12 +80,15 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		}
 	}
 	
-	for (var opt in settings.vibrateOpts) {
-		if (settings.vibrateOpts[opt] === 'disconnect') {
+	for (var opt in dict.vibrateOpts) {
+		if (dict.vibrateOpts[opt] === 'disconnect') {
 			vibrateDisconnect = true;
 		}
-		else if (settings.vibrateOpts[opt] === 'scoreChange') {
+		else if (dict.vibrateOpts[opt] === 'scoreChange') {
 			vibrateScoreChange = true;
+		}
+		else if (dict.vibrateOpts[opt] === 'gameEnd') {
+			vibrateGameEnd = true;
 		}
 	}
 	
@@ -864,6 +872,13 @@ function showGame (game, viewState) {
 			gameDrawn = true;
     }
     else if (game.gameState === 'Final' || game.gameState === 'Game Over') {
+			if (!gameViewedHasEnded && typeof gameViewedHasEnded !== null && vibrateGameEnd) {
+				UI.Vibe.vibrate('long');
+				gameViewedHasEnded = true;
+			}
+			else if (!gameViewedHasEnded && typeof gameViewedHasEnded === null) {
+				gameViewedHasEnded = false;
+			}
       var winner = attributes.wp;
       var loser = attributes.lp;
 			var saver = attributes.sp;
@@ -1001,6 +1016,7 @@ function showGame (game, viewState) {
 		gameMenu.show();
 		gameCard.hide();
 		gameCard.isBeingViewed = false;
+		gameViewedHasEnded = null;
 		scoreKey = '';
 	});
 	
