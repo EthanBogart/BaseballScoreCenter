@@ -395,7 +395,7 @@ function getGame(games, index) {
 	}
   	
   // Attributes that only apply to in progress games
-  if (status.status === 'In Progress') {
+  if (status.status === 'In Progress' || status.status === 'Manager Challenge') {
     // Batter
     var batter = game.batter;
 		var batterDisplay = batter.name_display_roster;
@@ -888,7 +888,7 @@ function showGame (game, viewState) {
 	var gameDrawn = false;
 	
   if (typeof attributes !== 'undefined') {
-    if (game.gameState === 'In Progress') {
+    if (game.gameState === 'In Progress' || game.status === 'Manager Challenge') {
 			matchupText = attributes.pitcherName + '\n (' + attributes.pitcherStats + ')\n' + attributes.batterName + '\n ('+ attributes.batterStats + ')';
 			gameCard = drawGame(game);
 			gameDrawn = true;
@@ -1079,9 +1079,9 @@ function gameSort (a,b) {
 	var bTime = getDateObj(b).getTime();
 	
 	if (a.status.status !== b.status.status) {
-		if (a.status.status === 'In Progress') {
+		if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
 			return -1;
-		} else if (b.status.status === 'In Progress') {
+		} else if (b.status.status === 'In Progress' || b.status.status === 'Manager Challenge') {
 			return 1;
 		} else if (a.status.status === 'Final' || a.status.status === 'Game Over') {
 			return 1;
@@ -1089,7 +1089,7 @@ function gameSort (a,b) {
 			return -1;
 		}
 	}
-	else if (a.status.status === 'In Progress') {
+	else if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
 		return bTime - aTime;
 	}
 	return aTime - bTime;
