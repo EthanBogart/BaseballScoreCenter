@@ -7,19 +7,65 @@
 var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
+var Settings = require('settings');
+var Platform = require('platform');
+var Clay = require('clay');
+var clayConfig = require('config');
+var clay = new Clay(clayConfig);
+
+var settings = Settings.state.options;
+console.log(JSON.stringify(settings, null, 4));
 var selectedDate = new Date();
 var gameMenu;
 var gameCard;
-var FAVORITE_TEAM_IDENTIFIER = 'ATL'; // Eg ATL, SEA, MI
+var identifierKeys = ['favTeam1', 'favTeam2', 'favTeam3']; // Don't judge me, this makes things easier to read
+var FAVORITE_TEAM_IDENTIFIERS = []; // Eg ATL, SEA, MI
+
+for (var keyIndex in identifierKeys) {
+	var key = identifierKeys[keyIndex];
+	var choice = settings[key];
+	if (choice !== '') {
+		FAVORITE_TEAM_IDENTIFIERS.push(choice);
+	}
+}
+
 var refreshInterval;
 var isStartup = true;
 var isBlurbView = false;
-var timeToRefresh = 5000;
+var timeToRefresh = settings.refreshRate * 1000;
+var scoreKey = '';
+var vibrateDisconnect = false;
+var vibrateScoreChange = false;
+var hasDisconnected = false;
+
+for (var opt in settings.vibrateOpts) {
+	if (settings.vibrateOpts[opt] === 'scoreChange') {
+		vibrateDisconnect = true;
+	}
+	else if (settings.vibrateOpts[opt] === 'scoreChange') {
+		vibrateScoreChange = true;
+	}
+}
 
 var main = new UI.Card({
-	title: 'Score Center',
+	title: 'Mr. Baseball',
 	subtitle: 'Loading...',
-  body: 'If games fail to load, hold select to retry'
+  body: 'If games fail to load, hold select to retry',
+	status: {
+		separator: 'none'
+	}
+});
+
+Pebble.addEventListener('showConfiguration', function(e) {
+  Pebble.openURL(clay.generateUrl());
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+  if (e && !e.response) {
+    return;
+  }
+  var dict = clay.getSettings(e.response);
+  Settings.option(dict);
 });
 
 main.on('longClick', 'select', function () {
@@ -112,9 +158,16 @@ function showMenu (games, itemIndex) {
 	var oldMenu = gameMenu;
 	gameMenu = null;
 	
+	var highlightBColor = Platform.version() === 'aplite' ? 'black' : '#55FFFF';
+	var highlightTColor = Platform.version() === 'aplite' ? 'white' : 'black';
 	gameMenu = new UI.Menu({
 		sections: [menuList],
-		games: games
+		games: games,
+		highlightBackgroundColor: highlightBColor,
+		highlightTextColor: highlightTColor,
+		status: {
+			separator: 'none'
+		}
 	});
 	
 	if (typeof itemIndex !== 'undefined') {
@@ -228,12 +281,16 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 			// set interval
       if (!refreshInterval) {
 				refreshInterval = setInterval(intervalRefresh,timeToRefresh);
-				console.log('Interval Set!');
 			}
-			else {console.log('Interval already set!');}
+			if (hasDisconnected) {
+				hasDisconnected = false;
+			}
     },
     function(error) {
-			UI.Vibe.vibrate('double');
+			if (!hasDisconnected) {
+				UI.Vibe.vibrate('double');
+				hasDisconnected = true;
+			}
 			console.log(error);
 		}
   );
@@ -264,7 +321,6 @@ function getURL () {
 	var scoreText = 'master_scoreboard.json';
 	
 	var ballurl = baseUrl + urlyear + urlmonth + urlday + scoreText;
-	console.log(ballurl);
 	
 	return ballurl;
 }
@@ -292,11 +348,13 @@ function getGame(games, index) {
   if (status.status === 'In Progress') {
     // Batter
     var batter = game.batter;
+		var batterDisplay = batter.name_display_roster;
     var batterName = batter.first + ' ' + batter.last;
     var batterStats = batter.avg + '/' + batter.obp + '/' + batter.slg;
     
     // Pitcher
     var pitcher = game.pitcher;
+		var pitcherDisplay = pitcher.name_display_roster;
     var pitcherName = pitcher.first + ' ' + pitcher.last;
     var pitcherStats = pitcher.wins + '-' + pitcher.losses + ', ' + pitcher.era;
 		
@@ -322,8 +380,10 @@ function getGame(games, index) {
 		}
     
     gameAttributes = {
+			batterDisplay: batterDisplay,
       batterName: batterName,
       batterStats: batterStats,
+			pitcherDisplay: pitcherDisplay,
       pitcherName: pitcherName,
       pitcherStats: pitcherStats,
 			runners: runners
@@ -334,14 +394,19 @@ function getGame(games, index) {
   else if (status.status === 'Final' || status.status === 'Game Over') {
     // Winning pitcher
     var wp = game.winning_pitcher;
-    var wpName = wp.first + ' ' + wp.last;
-    var wpStats = wp.wins + '-' + wp.losses + ', ' + wp.era + ' ERA';
+    var wpName = wp.name_display_roster;
+    var wpStats = wp.wins + '-' + wp.losses + ', ' + wp.era;
     
     // Losing pitcher
     var lp = game.losing_pitcher;
-    var lpName = lp.first + ' ' + lp.last;
-    var lpStats = lp.wins + '-' + lp.losses + ', ' + lp.era + ' ERA';
+    var lpName = lp.name_display_roster;
+    var lpStats = lp.wins + '-' + lp.losses + ', ' + lp.era;
     
+		// Save pitcher
+		var sp = game.save_pitcher;
+		var spName = sp.name_display_roster;
+    var spStats = sp.wins + '-' + sp.losses + ', ' + sp.era;
+		
     gameAttributes = {
       wp: {
         name: wpName,
@@ -350,7 +415,11 @@ function getGame(games, index) {
       lp: {
         name: lpName,
         stats: lpStats
-      }
+      },
+			sp: {
+				name: spName,
+				stats: spStats
+			}
     };
   }
   
@@ -414,7 +483,7 @@ function getGame(games, index) {
 function getPitcherObj (pitcher) {
 	// Winning pitcher
 	var name = pitcher.first + ' ' + pitcher.last;
-	var stats = pitcher.wins + '-' + pitcher.losses + ', ' + pitcher.era + ' ERA';
+	var stats = pitcher.wins + '-' + pitcher.losses + ', ' + pitcher.era;
 
 	return {
 		name: name,
@@ -432,7 +501,7 @@ function refreshGame (gameId, gameCard, isAuto) {
 		},
 		function (data) {
 			if (typeof isAuto === 'undefined') {
-			UI.Vibe.vibrate('short');
+				UI.Vibe.vibrate('short');
 			}
 
 			var games = data.data.games.game;
@@ -448,9 +517,14 @@ function refreshGame (gameId, gameCard, isAuto) {
 				gameCard.blurbCard.hide();
 			}
 
+			if (hasDisconnected) {
+				hasDisconnected = false;
+			}
 		},
 		function(error) {
-			UI.Vibe.vibrate('double');
+			if (!hasDisconnected) {
+				UI.Vibe.vibrate('double');	
+			}
 			console.log('Download failed: ' + error);
 		}
 	);
@@ -510,9 +584,14 @@ function getBlurb (data) {
 
 function drawGame (game) {
 	var elementList = [];
+	var adjuster = 180;
+	if (Platform.version() === 'basalt' || Platform.version() === 'aplite') {
+		adjuster = 144;
+	}
 	
+	var stxPos = adjuster === 180 ? 14 : 6;
 	var stateText = new UI.Text({
-		position: new Vector2(14, 60),
+		position: new Vector2(stxPos, 60),
 		size: new Vector2(180, 180),
 		font: 'gothic-18-bold',
 		text: 'B:\nS:\nO:\n',
@@ -525,15 +604,15 @@ function drawGame (game) {
 	var scoreLine = new UI.Line({
 		strokeColor: 'black',
 		strokeWidth: 1,
-		position: new Vector2(89,20),
-		position2: new Vector2(89,58),
+		position: new Vector2(89 * (adjuster/180),20),
+		position2: new Vector2(89 * (adjuster/180),58),
 		backgroundColor: 'white'
 	});
 	elementList.push(scoreLine);
 
 	var awayName = new UI.Text({
-		position: new Vector2(-8, 10),
-		size: new Vector2(90, 24),
+		position: new Vector2(-8 * (adjuster/180), 10),
+		size: new Vector2(90 * (adjuster/180), 24),
 		font: 'gothic-24-bold',
 		text: game.away,
 		textAlign: 'right',
@@ -543,8 +622,8 @@ function drawGame (game) {
 	elementList.push(awayName);
 
 	var homeName = new UI.Text({
-		position: new Vector2(98, 10),
-		size: new Vector2(90, 24),
+		position: new Vector2(98 * (adjuster/180), 10),
+		size: new Vector2(90 * (adjuster/180), 24),
 		font: 'gothic-24-bold',
 		text: game.home,
 		textAlign: 'left',
@@ -554,8 +633,8 @@ function drawGame (game) {
 	
 	var awayScore = new UI.Text({
 		clear: true,
-		position: new Vector2(-8, 38),
-		size: new Vector2(90, 20),
+		position: new Vector2(-8 * (adjuster/180), 38),
+		size: new Vector2(90 * (adjuster/180), 20),
 		font: 'leco-20-bold-numbers',
 		text: game.awayScore,
 		textAlign: 'right',
@@ -566,8 +645,8 @@ function drawGame (game) {
 
 	var homeScore = new UI.Text({
 		clear: true,
-		position: new Vector2(98, 38),
-		size: new Vector2(90, 20),
+		position: new Vector2(98 * (adjuster/180), 38),
+		size: new Vector2(90 * (adjuster/180), 20),
 		font: 'leco-20-bold-numbers',
 		text: game.homeScore,
 		textAlign: 'left',
@@ -578,7 +657,7 @@ function drawGame (game) {
 	
 	var timeText = new UI.TimeText({
 		text: '%I:%M',
-		size: new Vector2(180, 16),
+		size: new Vector2(180 * (adjuster/180), 16),
 		position: new Vector2(0, 2),
 		textAlign: 'center',
 		color: 'black',
@@ -587,11 +666,13 @@ function drawGame (game) {
 	});
 	elementList.push(timeText);
 
+	var delta = adjuster === 180 ? 16 : 18;
+	var x0 = adjuster === 180 ? 36 : 34;
 	for (var ball = 0; ball < 4; ball++) {
 		var bcolor = (ball < parseInt(game.status.b)) ? 'blue' : 'white';
 		var ballCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2(36 + (16*ball), 72),
+			position: new Vector2((x0 + (delta*ball)) * (adjuster/180), 72),
 			radius: 6,
 			backgroundColor: bcolor,
 			borderColor: 'black',
@@ -604,7 +685,7 @@ function drawGame (game) {
 		var scolor = (strike < parseInt(game.status.s)) ? 'red' : 'white';
 		var strikeCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2(36 + (16*strike), 90),
+			position: new Vector2((x0 + (delta*strike)) * (adjuster/180), 90),
 			radius: 6,
 			backgroundColor: scolor,
 			borderColor: 'black',
@@ -614,10 +695,10 @@ function drawGame (game) {
 	}
 	
 	for (var out = 0; out < 3; out++) {
-		var ocolor = (out < parseInt(game.status.o)) ? '#00AA00' : 'white';
+		var ocolor = (out < parseInt(game.status.o)) ? (Platform.version() === 'aplite' ? 'black' : '#00AA00') : 'white';
 		var outCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2(36 + (16*out), 108),
+			position: new Vector2((x0 + (delta*out)) * (adjuster/180), 108),
 			radius: 6,
 			backgroundColor: ocolor,
 			borderColor: 'black',
@@ -628,56 +709,58 @@ function drawGame (game) {
 	
 	var runners = game.attributes.runners;
 	
-	var baseOne = runners['1B'] ? 'full' : 'empty';
+	var fullBase = Platform.version() === 'aplite' ? 'full-aplite' : 'full';
+	var baseOne = runners['1B'] ? fullBase : 'empty';
 	var baseImage1 = new UI.Image({
-		position: new Vector2(152,96),
+		position: new Vector2(152 * (adjuster/180),96),
 		size: new Vector2(10,10),
 		image: 'images/base-' + baseOne + '.png'
 	});
 	elementList.push(baseImage1);
 
-	var baseTwo = runners['2B'] ? 'full' : 'empty';
+	var baseTwoY = adjuster === 180 ? 72 : (96 - (24 * (adjuster/180)));
+	var baseTwo = runners['2B'] ? fullBase : 'empty';
 	var baseImage2 = new UI.Image({
-		position: new Vector2(128,72),
+		position: new Vector2(128 * (adjuster/180),baseTwoY),
 		size: new Vector2(10,10),
 		image: 'images/base-' + baseTwo + '.png'
 	});
 	elementList.push(baseImage2);
 
-	var baseThree = runners['3B'] ? 'full' : 'empty';
+	var baseThree = runners['3B'] ? fullBase : 'empty';
 	var baseImage3 = new UI.Image({
-		position: new Vector2(104,96),
+		position: new Vector2(104 * (adjuster/180),96),
 		size: new Vector2(10,10),
 		image: 'images/base-' + baseThree + '.png'
 	});
 	elementList.push(baseImage3);
 
-		var lpText = new UI.Text({
-		position: new Vector2(0, 132),
-		size: new Vector2(180, 14),
+	var pText = new UI.Text({
+		position: new Vector2(0, 116),
+		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
-		text: 'Last Play: up',
+		text: 'P: ' + game.attributes.pitcherDisplay,
 		color: 'black',
 		textAlign: 'center',
 		backgroundColor: 'white'
 	});
-	elementList.push(lpText);
+	elementList.push(pText);
 
-	var mText = new UI.Text({
-		position: new Vector2(0, 148),
-		size: new Vector2(180, 14),
+	var bText = new UI.Text({
+		position: new Vector2(0, 132),
+		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
-		text: 'Matchup: down',
+		text: 'B: ' + game.attributes.batterDisplay,
 		color: 'black',
 		textAlign: 'center',
 		backgroundColor: 'white'
 	});
-	elementList.push(mText);
+	elementList.push(bText);
 	
 	var inning = game.inningState + ' ' + game.inning;
 	var iText = new UI.Text({
-		position: new Vector2(0, 116),
-		size: new Vector2(180, 14),
+		position: new Vector2(0, 148),
+		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
 		text: inning,
 		color: 'black',
@@ -729,7 +812,10 @@ function showGame (game, viewState) {
 					title: blurbTitle,
 					body: blurbText,
 					scrollable: true,
-					style: 'small'
+					style: 'small',
+					status: {
+						separator: 'none'
+					}
 				});
 
 				blurbCard.on('click', 'back', function () {
@@ -763,7 +849,11 @@ function showGame (game, viewState) {
     else if (game.gameState === 'Final' || game.gameState === 'Game Over') {
       var winner = attributes.wp;
       var loser = attributes.lp;
-      gameText = 'WP: ' + winner.name + '\n (' + winner.stats + ')\n' + 'LP: ' + loser.name + '\n (' + loser.stats + ')';
+			var saver = attributes.sp;
+      gameText = 'W: ' + winner.name + ' (' + winner.stats + ')\nL: ' + loser.name + ' (' + loser.stats + ')';
+			if (saver.name !== '') {
+				gameText = gameText + '\nS: ' + saver.name + ' (' + saver.stats + ')';
+			}
     }
 		else if (game.gameState === 'Preview') {
 			hpp = attributes.hpp;
@@ -775,13 +865,13 @@ function showGame (game, viewState) {
 			hpp = attributes.hpp;
 			app = attributes.app;
 			subtitle = game.gameState + ' - ' + attributes.reason;
-			style = 'large';
+			style = 'classic-small';
 		}
   }
   
 	if (game.hasStarted) {
 		subtitle = game.awayScore + ' - ' + game.homeScore; 
-		if (game.gameState === 'Final' || game.gameState === 'Final') {
+		if (game.gameState === 'Final' || game.gameState === 'Game Over') {
 			var extras = parseFloat(game.inning) > 9 ? ('/' + game.inning) : '';
 			subtitle = subtitle + ' (Final' + extras + ')';
 		}
@@ -796,7 +886,10 @@ function showGame (game, viewState) {
 	var matchup = new UI.Card({
 		title: 'Matchup',
 		body: matchupText,
-		style: style
+		style: style,
+		status: {
+			separator: 'none'
+		}
 	});
 
 	matchup.on('click', 'up', function () {
@@ -805,14 +898,28 @@ function showGame (game, viewState) {
 		gameCard.viewState = 'GameView';
 	});
 	
+	matchup.on('click', 'back', function () {
+		gameCard.show();
+		matchup.hide();
+		gameCard.viewState = 'GameView';
+	});
 
 	var pbpCard = new UI.Card({
 		title: 'Last Play',
 		body: game.pbpText,
-		style: 'small'
+		style: 'small',
+		status: {
+			separator: 'none'
+		}
 	});
 
 	pbpCard.on('click', 'down', function () {
+		gameCard.show();
+		pbpCard.hide();
+		gameCard.viewState = 'GameView';
+	});
+	
+	pbpCard.on('click', 'back', function () {
 		gameCard.show();
 		pbpCard.hide();
 		gameCard.viewState = 'GameView';
@@ -823,7 +930,10 @@ function showGame (game, viewState) {
 			title: game.away + ' @ ' + game.home,
 			subtitle: subtitle,
 			body: gameText,
-			style: style
+			style: style,
+			status: {
+				separator: 'none'
+			}
 		});
 	}
 	
@@ -833,6 +943,15 @@ function showGame (game, viewState) {
 	gameCard.matchup = matchup;
 	gameCard.blurbCard = blurbCard;
 	gameCard.menuIndex = game.index;
+	
+	var gameCardScoreKey = game.homeScore + '-' + game.awayScore;
+	if (scoreKey === '') {
+		scoreKey = game.homeScore + '-' + game.awayScore;
+	}
+	else if (gameCardScoreKey !== scoreKey && vibrateScoreChange) {
+		UI.Vibe.vibrate('short');
+		scoreKey = game.homeScore + '-' + game.awayScore;
+	}
 	
 	gameCard.on('longClick', 'select', function () {
 		refreshGame(game.UID, gameCard);
@@ -865,6 +984,7 @@ function showGame (game, viewState) {
 		gameMenu.show();
 		gameCard.hide();
 		gameCard.isBeingViewed = false;
+		scoreKey = '';
 	});
 	
 
@@ -889,11 +1009,15 @@ function showGame (game, viewState) {
 }
 
 function gameSort (a,b) {
-	if (a.away_name_abbrev === FAVORITE_TEAM_IDENTIFIER || a.home_name_abbrev === FAVORITE_TEAM_IDENTIFIER) {
-		return -1;
-	}
-	else if (b.away_name_abbrev === FAVORITE_TEAM_IDENTIFIER || b.home_name_abbrev === FAVORITE_TEAM_IDENTIFIER) {
-		return 1;
+
+	for (var teamIndex in FAVORITE_TEAM_IDENTIFIERS) {
+		var identifier = FAVORITE_TEAM_IDENTIFIERS[teamIndex];
+		if (a.away_name_abbrev === identifier || a.home_name_abbrev === identifier) {
+			return -1;
+		}
+		else if (b.away_name_abbrev === identifier || b.home_name_abbrev === identifier) {
+			return 1;
+		}
 	}
 	
 	var aTime = getDateObj(a).getTime();
