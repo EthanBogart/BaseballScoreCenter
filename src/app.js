@@ -265,7 +265,7 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 				
 			// set interval
       if (!refreshInterval) {
-				refreshInterval = setInterval(intervalRefresh,timeToRefresh);
+				//refreshInterval = setInterval(intervalRefresh,timeToRefresh);
 			}
     },
     function(error) {
@@ -564,8 +564,9 @@ function drawGame (game) {
 		adjuster = 144;
 	}
 	
+	var stxPos = adjuster === 180 ? 14 : 6;
 	var stateText = new UI.Text({
-		position: new Vector2(14 * (adjuster/180), 60),
+		position: new Vector2(stxPos, 60),
 		size: new Vector2(180, 180),
 		font: 'gothic-18-bold',
 		text: 'B:\nS:\nO:\n',
@@ -579,14 +580,14 @@ function drawGame (game) {
 		strokeColor: 'black',
 		strokeWidth: 1,
 		position: new Vector2(89 * (adjuster/180),20),
-		position2: new Vector2(89,58),
+		position2: new Vector2(89 * (adjuster/180),58),
 		backgroundColor: 'white'
 	});
 	elementList.push(scoreLine);
 
 	var awayName = new UI.Text({
 		position: new Vector2(-8 * (adjuster/180), 10),
-		size: new Vector2(90, 24),
+		size: new Vector2(90 * (adjuster/180), 24),
 		font: 'gothic-24-bold',
 		text: game.away,
 		textAlign: 'right',
@@ -597,7 +598,7 @@ function drawGame (game) {
 
 	var homeName = new UI.Text({
 		position: new Vector2(98 * (adjuster/180), 10),
-		size: new Vector2(90, 24),
+		size: new Vector2(90 * (adjuster/180), 24),
 		font: 'gothic-24-bold',
 		text: game.home,
 		textAlign: 'left',
@@ -608,7 +609,7 @@ function drawGame (game) {
 	var awayScore = new UI.Text({
 		clear: true,
 		position: new Vector2(-8 * (adjuster/180), 38),
-		size: new Vector2(90, 20),
+		size: new Vector2(90 * (adjuster/180), 20),
 		font: 'leco-20-bold-numbers',
 		text: game.awayScore,
 		textAlign: 'right',
@@ -620,7 +621,7 @@ function drawGame (game) {
 	var homeScore = new UI.Text({
 		clear: true,
 		position: new Vector2(98 * (adjuster/180), 38),
-		size: new Vector2(90, 20),
+		size: new Vector2(90 * (adjuster/180), 20),
 		font: 'leco-20-bold-numbers',
 		text: game.homeScore,
 		textAlign: 'left',
@@ -640,11 +641,13 @@ function drawGame (game) {
 	});
 	elementList.push(timeText);
 
+	var delta = adjuster === 180 ? 16 : 18;
+	var x0 = adjuster === 180 ? 36 : 34;
 	for (var ball = 0; ball < 4; ball++) {
 		var bcolor = (ball < parseInt(game.status.b)) ? 'blue' : 'white';
 		var ballCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2((36 + (16*ball)) * (adjuster/180), 72),
+			position: new Vector2((x0 + (delta*ball)) * (adjuster/180), 72),
 			radius: 6,
 			backgroundColor: bcolor,
 			borderColor: 'black',
@@ -657,7 +660,7 @@ function drawGame (game) {
 		var scolor = (strike < parseInt(game.status.s)) ? 'red' : 'white';
 		var strikeCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2((36 + (16*strike)) * (adjuster/180), 90),
+			position: new Vector2((x0 + (delta*strike)) * (adjuster/180), 90),
 			radius: 6,
 			backgroundColor: scolor,
 			borderColor: 'black',
@@ -670,7 +673,7 @@ function drawGame (game) {
 		var ocolor = (out < parseInt(game.status.o)) ? '#00AA00' : 'white';
 		var outCircle = new UI.Circle({
 			clear: true,
-			position: new Vector2((36 + (16*out)) * (adjuster/180), 108),
+			position: new Vector2((x0 + (delta*out)) * (adjuster/180), 108),
 			radius: 6,
 			backgroundColor: ocolor,
 			borderColor: 'black',
