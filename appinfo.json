@@ -30,6 +30,11 @@
                 "type": "font"
             },
             {
+                "file": "images/base-full.png",
+                "name": "IMAGES_BASE_FULL_PNG",
+                "type": "bitmap"
+            },
+            {
                 "file": "images/base-full-aplite.png",
                 "name": "IMAGES_BASE_FULL_APLITE_PNG",
                 "type": "png"
@@ -40,13 +45,8 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/base-full.png",
-                "name": "IMAGES_BASE_FULL_PNG",
-                "type": "bitmap"
-            },
-            {
-                "file": "images/action_bar_icon_check.png",
-                "name": "IMAGES_ACTION_BAR_ICON_CHECK_PNG",
+                "file": "images/action_bar_icon_up.png",
+                "name": "IMAGES_ACTION_BAR_ICON_UP_PNG",
                 "type": "bitmap"
             },
             {
@@ -55,8 +55,8 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/action_bar_icon_up.png",
-                "name": "IMAGES_ACTION_BAR_ICON_UP_PNG",
+                "file": "images/action_bar_icon_check.png",
+                "name": "IMAGES_ACTION_BAR_ICON_CHECK_PNG",
                 "type": "bitmap"
             }
         ]

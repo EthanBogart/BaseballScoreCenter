@@ -14,7 +14,6 @@ var clayConfig = require('config');
 var clay = new Clay(clayConfig);
 
 var settings = Settings.state.options;
-console.log(JSON.stringify(settings, null, 4));
 var selectedDate = new Date();
 var gameMenu;
 var gameCard;
@@ -137,7 +136,6 @@ function intervalRefresh () {
 	}
 	else if (gameCard && gameCard.isBeingViewed) {
 		refreshGame(gameCard.Id, gameCard, true);
-		console.log('refresh!');
 	}
 	else if (dateSelectWindow.isBeingViewed) {
 		// Do nothing
@@ -145,7 +143,6 @@ function intervalRefresh () {
 	else {
 		gameMenu.selection(function (selected) {
 			requestGames(showMenu, gameMenu, selected.itemIndex, true);
-			console.log('refresh!');
 		});
 	}
 }
@@ -452,7 +449,6 @@ function getGame(games, index) {
 		var awayScore = score.r.away;
 		hasStarted = true;
 	}
-	console.log(hasStarted);
 	
 	// Time start
 	var timeStart = game.time + game.time_zone;
@@ -507,9 +503,7 @@ function refreshGame (gameId, gameCard, isAuto) {
 			var games = data.data.games.game;
 			games.sort(gameSort);
 			var game = findGame(games, gameId);
-			console.log(gameCard.viewState);
 			showGame(game, gameCard.viewState);
-			console.log('refresh game: ' + gameCard.menuIndex);
 			showMenu(games, gameCard.menuIndex);
 			gameCard.pbpCard.hide();
 			gameCard.matchup.hide();
