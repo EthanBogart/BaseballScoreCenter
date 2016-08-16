@@ -4,7 +4,7 @@
         "configurable"
     ],
     "companyName": "Ethan Bogart",
-    "longName": "Baseball Score Center",
+    "longName": "BaseballGuy",
     "projectType": "pebblejs",
     "resources": {
         "media": [
@@ -62,7 +62,7 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "BaseballSC",
+    "shortName": "Mr. Baseball Guy",
     "targetPlatforms": [
         "aplite",
         "basalt",
