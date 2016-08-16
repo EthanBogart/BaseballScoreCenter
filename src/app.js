@@ -14,7 +14,6 @@ var clayConfig = require('config');
 var clay = new Clay(clayConfig);
 
 var settings = Settings.state.options;
-console.log(JSON.stringify(settings, null, 4));
 var selectedDate = new Date();
 var gameMenu;
 var gameCard;
@@ -32,7 +31,7 @@ for (var keyIndex in identifierKeys) {
 var refreshInterval;
 var isStartup = true;
 var isBlurbView = false;
-var timeToRefresh = settings.refreshRate * 1000;
+var timeToRefresh = (settings.refreshRate * 1000) || 30000;
 var scoreKey = '';
 var vibrateDisconnect = false;
 var vibrateScoreChange = false;
@@ -137,7 +136,6 @@ function intervalRefresh () {
 	}
 	else if (gameCard && gameCard.isBeingViewed) {
 		refreshGame(gameCard.Id, gameCard, true);
-		console.log('refresh!');
 	}
 	else if (dateSelectWindow.isBeingViewed) {
 		// Do nothing
@@ -145,7 +143,6 @@ function intervalRefresh () {
 	else {
 		gameMenu.selection(function (selected) {
 			requestGames(showMenu, gameMenu, selected.itemIndex, true);
-			console.log('refresh!');
 		});
 	}
 }
@@ -266,7 +263,6 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
     },
     function (data) {
 			if (typeof isAuto === 'undefined' && !dateSelectWindow.isBeingViewed && !isStartup) {
-				isStartup = false;
 				UI.Vibe.vibrate('short');
 			}
 			
@@ -277,10 +273,12 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 			if (loadView) {
 				loadView.hide();
 			}
+			isStartup = false;
 				
 			// set interval
       if (!refreshInterval) {
 				refreshInterval = setInterval(intervalRefresh,timeToRefresh);
+				
 			}
 			if (hasDisconnected) {
 				hasDisconnected = false;
@@ -452,7 +450,6 @@ function getGame(games, index) {
 		var awayScore = score.r.away;
 		hasStarted = true;
 	}
-	console.log(hasStarted);
 	
 	// Time start
 	var timeStart = game.time + game.time_zone;
@@ -507,9 +504,7 @@ function refreshGame (gameId, gameCard, isAuto) {
 			var games = data.data.games.game;
 			games.sort(gameSort);
 			var game = findGame(games, gameId);
-			console.log(gameCard.viewState);
 			showGame(game, gameCard.viewState);
-			console.log('refresh game: ' + gameCard.menuIndex);
 			showMenu(games, gameCard.menuIndex);
 			gameCard.pbpCard.hide();
 			gameCard.matchup.hide();
@@ -571,16 +566,16 @@ function getLocalTime (game) {
 
 // Actually the worst code I've ever written
 // PebbleJS does not provide a DOM parser
-function getBlurb (data) {
-	var spl = data.split('<blurb>');
-	if (spl.length > 1) {
-		var bStart = spl[1];
-		var bspl = bStart.split(']]>');
-		var bracketspl = bspl[0].split('TA[');
-		return bracketspl[1];
-	}
-	return null;
-}
+// function getBlurb (data) {
+// 	var spl = data.split('<blurb>');
+// 	if (spl.length > 1) {
+// 		var bStart = spl[1];
+// 		var bspl = bStart.split(']]>');
+// 		var bracketspl = bspl[0].split('TA[');
+// 		return bracketspl[1];
+// 	}
+// 	return null;
+// }
 
 function drawGame (game) {
 	var elementList = [];
@@ -782,52 +777,52 @@ function drawGame (game) {
 function showGame (game, viewState) {
 	// Immediately run ajax in order to get blurb
 	
-	var blurbText = '';
-	var blurbCard;
-	var blurbTitle;
-	if (game.gameState !== 'In Progress') {
-		ajax(
-			{
-				url: 'http://m.mlb.com/gdcross/' + game.dir + '/gamecenter.xml',
-				type:'xml',
-				async: true
-			},
-			function (data) {
+// 	var blurbText = '';
+// 	var blurbCard;
+// 	var blurbTitle;
+// 	if (game.gameState !== 'In Progress') {
+// 		ajax(
+// 			{
+// 				url: 'http://m.mlb.com/gdcross/' + game.dir + '/gamecenter.xml',
+// 				type:'xml',
+// 				async: true
+// 			},
+// 			function (data) {
 
-				if (data.indexOf('wrap') !== -1) {
-					var spl = data.split('wrap');
-					var blurb = getBlurb(spl[1]);
-					if (blurb) {
-						blurbText = blurb;
-						blurbTitle = 'Game Wrap';
-					}
-				} 
+// 				if (data.indexOf('wrap') !== -1) {
+// 					var spl = data.split('wrap');
+// 					var blurb = getBlurb(spl[1]);
+// 					if (blurb) {
+// 						blurbText = blurb;
+// 						blurbTitle = 'Game Wrap';
+// 					}
+// 				} 
 
-				if (blurbText.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '') === '') {
-					blurbText = getBlurb(data);
-					blurbTitle = 'Game Brief';
-				}
+// 				if (blurbText.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '') === '') {
+// 					blurbText = getBlurb(data);
+// 					blurbTitle = 'Game Brief';
+// 				}
 
-				blurbCard = new UI.Card({
-					title: blurbTitle,
-					body: blurbText,
-					scrollable: true,
-					style: 'small',
-					status: {
-						separator: 'none'
-					}
-				});
+// 				blurbCard = new UI.Card({
+// 					title: blurbTitle,
+// 					body: blurbText,
+// 					scrollable: true,
+// 					style: 'small',
+// 					status: {
+// 						separator: 'none'
+// 					}
+// 				});
 
-				blurbCard.on('click', 'back', function () {
-					gameCard.show();
-					blurbCard.hide();
-					isBlurbView = false;
-				});
-			},
-			function(error) {
-			}
-		);
-	}
+// 				blurbCard.on('click', 'back', function () {
+// 					gameCard.show();
+// 					blurbCard.hide();
+// 					isBlurbView = false;
+// 				});
+// 			},
+// 			function(error) {
+// 			}
+// 		);
+// 	}
 	
 	
   var attributes = game.attributes;
@@ -941,7 +936,7 @@ function showGame (game, viewState) {
 	gameCard.gameState = game.gameState;
 	gameCard.pbpCard = pbpCard;
 	gameCard.matchup = matchup;
-	gameCard.blurbCard = blurbCard;
+	//gameCard.blurbCard = blurbCard;
 	gameCard.menuIndex = game.index;
 	
 	var gameCardScoreKey = game.homeScore + '-' + game.awayScore;

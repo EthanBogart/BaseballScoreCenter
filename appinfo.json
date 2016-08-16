@@ -4,7 +4,7 @@
         "configurable"
     ],
     "companyName": "Ethan Bogart",
-    "longName": "Baseball Score Center",
+    "longName": "BaseballGuy",
     "projectType": "pebblejs",
     "resources": {
         "media": [
@@ -30,6 +30,11 @@
                 "type": "font"
             },
             {
+                "file": "images/base-full.png",
+                "name": "IMAGES_BASE_FULL_PNG",
+                "type": "bitmap"
+            },
+            {
                 "file": "images/base-full-aplite.png",
                 "name": "IMAGES_BASE_FULL_APLITE_PNG",
                 "type": "png"
@@ -40,13 +45,8 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/base-full.png",
-                "name": "IMAGES_BASE_FULL_PNG",
-                "type": "bitmap"
-            },
-            {
-                "file": "images/action_bar_icon_check.png",
-                "name": "IMAGES_ACTION_BAR_ICON_CHECK_PNG",
+                "file": "images/action_bar_icon_up.png",
+                "name": "IMAGES_ACTION_BAR_ICON_UP_PNG",
                 "type": "bitmap"
             },
             {
@@ -55,14 +55,14 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/action_bar_icon_up.png",
-                "name": "IMAGES_ACTION_BAR_ICON_UP_PNG",
+                "file": "images/action_bar_icon_check.png",
+                "name": "IMAGES_ACTION_BAR_ICON_CHECK_PNG",
                 "type": "bitmap"
             }
         ]
     },
     "sdkVersion": "3",
-    "shortName": "BaseballSC",
+    "shortName": "Mr. Baseball Guy",
     "targetPlatforms": [
         "aplite",
         "basalt",
@@ -70,7 +70,7 @@
     ],
     "uuid": "242527ec-21b8-4d35-b7ad-c77ff18b3920",
     "versionCode": 1,
-    "versionLabel": "1.0",
+    "versionLabel": "1.1",
     "watchapp": {
         "hiddenApp": false,
         "watchface": false
