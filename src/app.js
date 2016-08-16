@@ -13,20 +13,8 @@ var Clay = require('clay');
 var clayConfig = require('config');
 var clay = new Clay(clayConfig);
 
-Pebble.addEventListener('showConfiguration', function(e) {
-  Pebble.openURL(clay.generateUrl());
-});
-
-Pebble.addEventListener('webviewclosed', function(e) {
-  if (e && !e.response) {
-    return;
-  }
-  var dict = clay.getSettings(e.response);
-
-  Settings.option(dict);
-});
-
 var settings = Settings.state.options;
+console.log(JSON.stringify(settings, null, 4));
 var selectedDate = new Date();
 var gameMenu;
 var gameCard;
@@ -46,14 +34,38 @@ var isStartup = true;
 var isBlurbView = false;
 var timeToRefresh = settings.refreshRate * 1000;
 var scoreKey = '';
+var vibrateDisconnect = false;
+var vibrateScoreChange = false;
+var hasDisconnected = false;
+
+for (var opt in settings.vibrateOpts) {
+	if (settings.vibrateOpts[opt] === 'scoreChange') {
+		vibrateDisconnect = true;
+	}
+	else if (settings.vibrateOpts[opt] === 'scoreChange') {
+		vibrateScoreChange = true;
+	}
+}
 
 var main = new UI.Card({
-	title: 'Score Center',
+	title: 'Mr. Baseball',
 	subtitle: 'Loading...',
   body: 'If games fail to load, hold select to retry',
 	status: {
 		separator: 'none'
 	}
+});
+
+Pebble.addEventListener('showConfiguration', function(e) {
+  Pebble.openURL(clay.generateUrl());
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+  if (e && !e.response) {
+    return;
+  }
+  var dict = clay.getSettings(e.response);
+  Settings.option(dict);
 });
 
 main.on('longClick', 'select', function () {
@@ -268,11 +280,17 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 				
 			// set interval
       if (!refreshInterval) {
-				//refreshInterval = setInterval(intervalRefresh,timeToRefresh);
+				refreshInterval = setInterval(intervalRefresh,timeToRefresh);
+			}
+			if (hasDisconnected) {
+				hasDisconnected = false;
 			}
     },
     function(error) {
-			UI.Vibe.vibrate('double');
+			if (!hasDisconnected) {
+				UI.Vibe.vibrate('double');
+				hasDisconnected = true;
+			}
 			console.log(error);
 		}
   );
@@ -303,7 +321,6 @@ function getURL () {
 	var scoreText = 'master_scoreboard.json';
 	
 	var ballurl = baseUrl + urlyear + urlmonth + urlday + scoreText;
-	console.log(ballurl);
 	
 	return ballurl;
 }
@@ -484,7 +501,7 @@ function refreshGame (gameId, gameCard, isAuto) {
 		},
 		function (data) {
 			if (typeof isAuto === 'undefined') {
-			UI.Vibe.vibrate('short');
+				UI.Vibe.vibrate('short');
 			}
 
 			var games = data.data.games.game;
@@ -500,9 +517,14 @@ function refreshGame (gameId, gameCard, isAuto) {
 				gameCard.blurbCard.hide();
 			}
 
+			if (hasDisconnected) {
+				hasDisconnected = false;
+			}
 		},
 		function(error) {
-			UI.Vibe.vibrate('double');
+			if (!hasDisconnected) {
+				UI.Vibe.vibrate('double');	
+			}
 			console.log('Download failed: ' + error);
 		}
 	);
@@ -926,7 +948,7 @@ function showGame (game, viewState) {
 	if (scoreKey === '') {
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
-	else if (gameCardScoreKey !== scoreKey) {
+	else if (gameCardScoreKey !== scoreKey && vibrateScoreChange) {
 		UI.Vibe.vibrate('short');
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}

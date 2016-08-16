@@ -416,17 +416,8 @@ module.exports = [
 		]
   },
 	{
-		"type": "slider",
-		"appKey": "refreshRate",
-		"defaultValue": 30,
-		"label": "Refresh rate (seconds)",
-		"min": 5,
-		"max": 120,
-		"description": "Remember: higher refresh rates may increase battery usage. You can also hold select while viewing a game to refresh manually."
-	},
-	{
 		"type": "checkboxgroup",
-		"appkey": "vibrateOpts",
+		"appKey": "vibrateOpts",
 		"label": "Vibrate on:",
 		"defaultValue": ["scoreChange", "disconnect"],
 		"options": [
@@ -439,6 +430,15 @@ module.exports = [
 				"value": "disconnect"
 			}
 		]
+	},
+	{
+		"type": "slider",
+		"appKey": "refreshRate",
+		"defaultValue": 30,
+		"label": "Refresh rate (seconds)",
+		"min": 5,
+		"max": 120,
+		"description": "Remember: higher refresh rates may increase battery usage. You can also hold select while viewing a game to refresh manually."
 	},
 	{
 		"type": "submit",
