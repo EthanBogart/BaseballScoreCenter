@@ -35,15 +35,25 @@ var timeToRefresh = (settings.refreshRate * 1000) || 30000;
 var scoreKey = '';
 var vibrateDisconnect = false;
 var vibrateScoreChange = false;
+var vibrateGameEnd = false;
 var hasDisconnected = false;
+var onlyShowFavorites = false;
+var gameViewedHasEnded = null;
 
 for (var opt in settings.vibrateOpts) {
-	if (settings.vibrateOpts[opt] === 'scoreChange') {
+	if (settings.vibrateOpts[opt] === 'disconnect') {
 		vibrateDisconnect = true;
 	}
 	else if (settings.vibrateOpts[opt] === 'scoreChange') {
 		vibrateScoreChange = true;
 	}
+	else if (settings.vibrateOpts[opt] === 'gameEnd') {
+		vibrateGameEnd = true;
+	}
+}
+
+if (settings.onlyShowFav && settings.onlyShowFav.length === 1) {
+	onlyShowFavorites = true;
 }
 
 var main = new UI.Card({
@@ -64,6 +74,30 @@ Pebble.addEventListener('webviewclosed', function(e) {
     return;
   }
   var dict = clay.getSettings(e.response);
+	console.log(dict);
+	FAVORITE_TEAM_IDENTIFIERS = [];
+	for (var keyIndex in identifierKeys) {
+		var key = identifierKeys[keyIndex];
+		var choice = dict[key];
+		if (choice !== '') {
+			FAVORITE_TEAM_IDENTIFIERS.push(choice);
+		}
+	}
+	
+	for (var opt in dict.vibrateOpts) {
+		if (dict.vibrateOpts[opt] === 'disconnect') {
+			vibrateDisconnect = true;
+		}
+		else if (dict.vibrateOpts[opt] === 'scoreChange') {
+			vibrateScoreChange = true;
+		}
+		else if (dict.vibrateOpts[opt] === 'gameEnd') {
+			vibrateGameEnd = true;
+		}
+	}
+	
+	intervalRefresh();
+	
   Settings.option(dict);
 });
 
@@ -201,6 +235,16 @@ function showMenu (games, itemIndex) {
 	
 }
 
+function checkForFavorite(game) {
+	for (var tIndex in FAVORITE_TEAM_IDENTIFIERS) {
+		var favTeam = FAVORITE_TEAM_IDENTIFIERS[tIndex];
+		if (game.home_name_abbrev === favTeam || game.away_name_abbrev === favTeam) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function arrangeGamesForMenu (games) {
 	var menuList = [];
 	
@@ -233,10 +277,18 @@ function arrangeGamesForMenu (games) {
 			subtitleText = getLocalTime(game);
 		}
 		
-		menuList.push({
-			title: titleText,
-			subtitle: subtitleText
-		});	
+		if (onlyShowFavorites && checkForFavorite(game)) {
+			menuList.push({
+				title: titleText,
+				subtitle: subtitleText
+			});
+		}
+		else if (!onlyShowFavorites) {
+			menuList.push({
+				title: titleText,
+				subtitle: subtitleText
+			});
+		}
 	}
 	
 	// Date selector:
@@ -343,7 +395,7 @@ function getGame(games, index) {
 	}
   	
   // Attributes that only apply to in progress games
-  if (status.status === 'In Progress') {
+  if (status.status === 'In Progress' || status.status === 'Manager Challenge') {
     // Batter
     var batter = game.batter;
 		var batterDisplay = batter.name_display_roster;
@@ -836,12 +888,19 @@ function showGame (game, viewState) {
 	var gameDrawn = false;
 	
   if (typeof attributes !== 'undefined') {
-    if (game.gameState === 'In Progress') {
+    if (game.gameState === 'In Progress' || game.status === 'Manager Challenge') {
 			matchupText = attributes.pitcherName + '\n (' + attributes.pitcherStats + ')\n' + attributes.batterName + '\n ('+ attributes.batterStats + ')';
 			gameCard = drawGame(game);
 			gameDrawn = true;
     }
     else if (game.gameState === 'Final' || game.gameState === 'Game Over') {
+			if (!gameViewedHasEnded && typeof gameViewedHasEnded !== null && vibrateGameEnd) {
+				UI.Vibe.vibrate('long');
+				gameViewedHasEnded = true;
+			}
+			else if (!gameViewedHasEnded && typeof gameViewedHasEnded === null) {
+				gameViewedHasEnded = false;
+			}
       var winner = attributes.wp;
       var loser = attributes.lp;
 			var saver = attributes.sp;
@@ -979,6 +1038,7 @@ function showGame (game, viewState) {
 		gameMenu.show();
 		gameCard.hide();
 		gameCard.isBeingViewed = false;
+		gameViewedHasEnded = null;
 		scoreKey = '';
 	});
 	
@@ -1019,9 +1079,9 @@ function gameSort (a,b) {
 	var bTime = getDateObj(b).getTime();
 	
 	if (a.status.status !== b.status.status) {
-		if (a.status.status === 'In Progress') {
+		if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
 			return -1;
-		} else if (b.status.status === 'In Progress') {
+		} else if (b.status.status === 'In Progress' || b.status.status === 'Manager Challenge') {
 			return 1;
 		} else if (a.status.status === 'Final' || a.status.status === 'Game Over') {
 			return 1;
@@ -1029,7 +1089,7 @@ function gameSort (a,b) {
 			return -1;
 		}
 	}
-	else if (a.status.status === 'In Progress') {
+	else if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
 		return bTime - aTime;
 	}
 	return aTime - bTime;

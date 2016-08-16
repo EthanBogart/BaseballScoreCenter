@@ -4,11 +4,6 @@ module.exports = [
     "defaultValue": "Score Center Settings",
 		"size": 1
   },
-	{
-		"type": "heading",
-		"defaultValue": "You will need to restart the app for the changes to come into effect.",
-		"size": 5
-	},
   { 
 		"type": "section",
 		"items": [
@@ -412,6 +407,17 @@ module.exports = [
 						"value": "WAS"
 					}
 				]
+			},
+			{
+				"type": "checkboxgroup",
+				"appKey": "onlyShowFav",
+				"defaultValue": [],
+				"options": [
+					{
+						"label": "Only show selected favorites -- app restart required after change",
+						"value": "showFav"
+					}
+				],
 			}
 		]
   },
@@ -426,6 +432,10 @@ module.exports = [
 				"value": "scoreChange"
 			},
 			{
+				"label": "Game end (long)",
+				"value": "gameEnd"
+			},
+			{
 				"label": "Disconnect (short double)",
 				"value": "disconnect"
 			}
@@ -435,7 +445,7 @@ module.exports = [
 		"type": "slider",
 		"appKey": "refreshRate",
 		"defaultValue": 30,
-		"label": "Refresh rate (seconds)",
+		"label": "Refresh rate (seconds) -- app restart required after change",
 		"min": 5,
 		"max": 120,
 		"description": "Remember: higher refresh rates may increase battery usage. You can also hold select while viewing a game to refresh manually."
