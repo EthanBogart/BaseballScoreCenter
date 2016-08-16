@@ -146,10 +146,13 @@ function showMenu (games, itemIndex) {
 	var oldMenu = gameMenu;
 	gameMenu = null;
 	
+	var highlightBColor = Platform.version() === 'aplite' ? 'black' : '#55FFFF';
+	var highlightTColor = Platform.version() === 'aplite' ? 'white' : 'black';
 	gameMenu = new UI.Menu({
 		sections: [menuList],
 		games: games,
-		highlightBackgroundColor: '#0055AA',
+		highlightBackgroundColor: highlightBColor,
+		highlightTextColor: highlightTColor,
 		status: {
 			separator: 'none'
 		}
@@ -670,7 +673,7 @@ function drawGame (game) {
 	}
 	
 	for (var out = 0; out < 3; out++) {
-		var ocolor = (out < parseInt(game.status.o)) ? '#00AA00' : 'white';
+		var ocolor = (out < parseInt(game.status.o)) ? (Platform.version() === 'aplite' ? 'black' : '#00AA00') : 'white';
 		var outCircle = new UI.Circle({
 			clear: true,
 			position: new Vector2((x0 + (delta*out)) * (adjuster/180), 108),
@@ -684,7 +687,8 @@ function drawGame (game) {
 	
 	var runners = game.attributes.runners;
 	
-	var baseOne = runners['1B'] ? 'full' : 'empty';
+	var fullBase = Platform.version() === 'aplite' ? 'full-aplite' : 'full';
+	var baseOne = runners['1B'] ? fullBase : 'empty';
 	var baseImage1 = new UI.Image({
 		position: new Vector2(152 * (adjuster/180),96),
 		size: new Vector2(10,10),
@@ -692,15 +696,16 @@ function drawGame (game) {
 	});
 	elementList.push(baseImage1);
 
-	var baseTwo = runners['2B'] ? 'full' : 'empty';
+	var baseTwoY = adjuster === 180 ? 72 : (96 - (24 * (adjuster/180)));
+	var baseTwo = runners['2B'] ? fullBase : 'empty';
 	var baseImage2 = new UI.Image({
-		position: new Vector2(128 * (adjuster/180),72),
+		position: new Vector2(128 * (adjuster/180),baseTwoY),
 		size: new Vector2(10,10),
 		image: 'images/base-' + baseTwo + '.png'
 	});
 	elementList.push(baseImage2);
 
-	var baseThree = runners['3B'] ? 'full' : 'empty';
+	var baseThree = runners['3B'] ? fullBase : 'empty';
 	var baseImage3 = new UI.Image({
 		position: new Vector2(104 * (adjuster/180),96),
 		size: new Vector2(10,10),
@@ -923,6 +928,7 @@ function showGame (game, viewState) {
 	}
 	else if (gameCardScoreKey !== scoreKey) {
 		UI.Vibe.vibrate('short');
+		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
 	
 	gameCard.on('longClick', 'select', function () {

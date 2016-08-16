@@ -30,6 +30,11 @@
                 "type": "font"
             },
             {
+                "file": "images/base-full-aplite.png",
+                "name": "IMAGES_BASE_FULL_APLITE_PNG",
+                "type": "png"
+            },
+            {
                 "file": "images/base-empty.png",
                 "name": "IMAGES_BASE_EMPTY_PNG",
                 "type": "bitmap"
@@ -59,6 +64,7 @@
     "sdkVersion": "3",
     "shortName": "BaseballSC",
     "targetPlatforms": [
+        "aplite",
         "basalt",
         "chalk"
     ],

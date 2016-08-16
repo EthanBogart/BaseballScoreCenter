@@ -425,6 +425,22 @@ module.exports = [
 		"description": "Remember: higher refresh rates may increase battery usage. You can also hold select while viewing a game to refresh manually."
 	},
 	{
+		"type": "checkboxgroup",
+		"appkey": "vibrateOpts",
+		"label": "Vibrate on:",
+		"defaultValue": ["scoreChange", "disconnect"],
+		"options": [
+			{
+				"label": "Score change (short)",
+				"value": "scoreChange"
+			},
+			{
+				"label": "Disconnect (short double)",
+				"value": "disconnect"
+			}
+		]
+	},
+	{
 		"type": "submit",
 		"defaultValue": "Save"
 	}
