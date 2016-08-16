@@ -31,7 +31,6 @@ for (var keyIndex in identifierKeys) {
 var refreshInterval;
 var isStartup = true;
 var isBlurbView = false;
-console.log(settings.refreshRate);
 var timeToRefresh = (settings.refreshRate * 1000) || 30000;
 var scoreKey = '';
 var vibrateDisconnect = false;
@@ -264,7 +263,6 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
     },
     function (data) {
 			if (typeof isAuto === 'undefined' && !dateSelectWindow.isBeingViewed && !isStartup) {
-				isStartup = false;
 				UI.Vibe.vibrate('short');
 			}
 			
@@ -275,6 +273,7 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 			if (loadView) {
 				loadView.hide();
 			}
+			isStartup = false;
 				
 			// set interval
       if (!refreshInterval) {
