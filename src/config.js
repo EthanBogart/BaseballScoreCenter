@@ -4,11 +4,6 @@ module.exports = [
     "defaultValue": "Score Center Settings",
 		"size": 1
   },
-	{
-		"type": "heading",
-		"defaultValue": "You will need to restart the app for the changes to come into effect.",
-		"size": 5
-	},
   { 
 		"type": "section",
 		"items": [
@@ -435,7 +430,7 @@ module.exports = [
 		"type": "slider",
 		"appKey": "refreshRate",
 		"defaultValue": 30,
-		"label": "Refresh rate (seconds)",
+		"label": "Refresh rate (seconds) -- app restart required",
 		"min": 5,
 		"max": 120,
 		"description": "Remember: higher refresh rates may increase battery usage. You can also hold select while viewing a game to refresh manually."

@@ -38,13 +38,14 @@ var vibrateScoreChange = false;
 var hasDisconnected = false;
 
 for (var opt in settings.vibrateOpts) {
-	if (settings.vibrateOpts[opt] === 'scoreChange') {
+	if (settings.vibrateOpts[opt] === 'disconnect') {
 		vibrateDisconnect = true;
 	}
 	else if (settings.vibrateOpts[opt] === 'scoreChange') {
 		vibrateScoreChange = true;
 	}
 }
+console.log(vibrateScoreChange);
 
 var main = new UI.Card({
 	title: 'Mr. Baseball',
@@ -64,6 +65,27 @@ Pebble.addEventListener('webviewclosed', function(e) {
     return;
   }
   var dict = clay.getSettings(e.response);
+	console.log(dict);
+	FAVORITE_TEAM_IDENTIFIERS = [];
+	for (var keyIndex in identifierKeys) {
+		var key = identifierKeys[keyIndex];
+		var choice = dict[key];
+		if (choice !== '') {
+			FAVORITE_TEAM_IDENTIFIERS.push(choice);
+		}
+	}
+	
+	for (var opt in settings.vibrateOpts) {
+		if (settings.vibrateOpts[opt] === 'disconnect') {
+			vibrateDisconnect = true;
+		}
+		else if (settings.vibrateOpts[opt] === 'scoreChange') {
+			vibrateScoreChange = true;
+		}
+	}
+	
+	intervalRefresh();
+	
   Settings.option(dict);
 });
 
