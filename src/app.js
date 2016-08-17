@@ -651,7 +651,7 @@ function drawGame (game) {
 		strokeColor: 'black',
 		strokeWidth: 1,
 		position: new Vector2(89 * (adjuster/180),20),
-		position2: new Vector2(89 * (adjuster/180),58),
+		position2: new Vector2(89 * (adjuster/180),60),
 		backgroundColor: 'white'
 	});
 	elementList.push(scoreLine);
@@ -679,9 +679,9 @@ function drawGame (game) {
 	
 	var awayScore = new UI.Text({
 		clear: true,
-		position: new Vector2(-8 * (adjuster/180), 38),
+		position: new Vector2(-8 * (adjuster/180), 34),
 		size: new Vector2(90 * (adjuster/180), 20),
-		font: 'leco-20-bold-numbers',
+		font: 'leco-26-bold-numbers-am-pm',
 		text: game.awayScore,
 		textAlign: 'right',
 		color: '#555555',
@@ -691,9 +691,9 @@ function drawGame (game) {
 
 	var homeScore = new UI.Text({
 		clear: true,
-		position: new Vector2(98 * (adjuster/180), 38),
+		position: new Vector2(98 * (adjuster/180), 34),
 		size: new Vector2(90 * (adjuster/180), 20),
-		font: 'leco-20-bold-numbers',
+		font: 'leco-26-bold-numbers-am-pm',
 		text: game.homeScore,
 		textAlign: 'left',
 		color: '#555555',
@@ -781,8 +781,20 @@ function drawGame (game) {
 	});
 	elementList.push(baseImage3);
 
+	var inning = game.inningState + ' ' + game.inning;
+	var iText = new UI.Text({
+		position: new Vector2(0, 108),
+		size: new Vector2(180 * (adjuster/180), 14),
+		font: 'gothic-24-bold',
+		text: inning,
+		color: 'black',
+		textAlign: 'center',
+		clear: true
+	});
+	elementList.push(iText);
+
 	var pText = new UI.Text({
-		position: new Vector2(0, 116),
+		position: new Vector2(0, 134),
 		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
 		text: 'P: ' + game.attributes.pitcherDisplay,
@@ -793,7 +805,7 @@ function drawGame (game) {
 	elementList.push(pText);
 
 	var bText = new UI.Text({
-		position: new Vector2(0, 132),
+		position: new Vector2(0, 150),
 		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-14',
 		text: 'B: ' + game.attributes.batterDisplay,
@@ -802,18 +814,6 @@ function drawGame (game) {
 		backgroundColor: 'white'
 	});
 	elementList.push(bText);
-	
-	var inning = game.inningState + ' ' + game.inning;
-	var iText = new UI.Text({
-		position: new Vector2(0, 148),
-		size: new Vector2(180 * (adjuster/180), 14),
-		font: 'gothic-14',
-		text: inning,
-		color: 'black',
-		textAlign: 'center',
-		backgroundColor: 'white'
-	});
-	elementList.push(iText);
 	
 	var gameWindow = new UI.Window({
 		backgroundColor: 'white'
