@@ -30,7 +30,6 @@ for (var keyIndex in identifierKeys) {
 
 var refreshInterval;
 var isStartup = true;
-var isBlurbView = false;
 var timeToRefresh = (settings.refreshRate * 1000) || 30000;
 var scoreKey = '';
 var vibrateDisconnect = false;
@@ -830,28 +829,32 @@ function arrangePlaysForMenu (plays) {
 	var playList = [];
 	var playTypes = ['action', 'atbat'];
 	var inningHalfs = ['top', 'bottom'];
+	var iCount = 0;
 	for (var inningIndex in plays) {
-		var inning = plays[inningIndex];
-		for (var inningHalfIndex in inningHalfs) {
-			var inningHalf = inningHalfs[inningHalfIndex];
-			for (var playTypeIndex in playTypes) {
-				var playType = playTypes[playTypeIndex];
-				if (inning[inningHalf] && inning[inningHalf][playType]) {
-					var playGroup = inning[inningHalf][playType];
-					
-					if (playGroup.length > 1) {
-						for (var playIndex in playGroup) {
-							var play = playGroup[playIndex];
-							play.inningHalf = inningHalf;
-							play.inning = inning.num;
-							playList.push(play);
+		var inning = plays.constructor === Array ? plays[inningIndex] : plays;
+		if (plays.constructor === Array || iCount === 0) {
+			iCount += 1;
+			for (var inningHalfIndex in inningHalfs) {
+				var inningHalf = inningHalfs[inningHalfIndex];
+				for (var playTypeIndex in playTypes) {
+					var playType = playTypes[playTypeIndex];
+					if (inning[inningHalf] && inning[inningHalf][playType]) {
+						var playGroup = inning[inningHalf][playType];
+
+						if (playGroup.length > 1) {
+							for (var playIndex in playGroup) {
+								var play = playGroup[playIndex];
+								play.inningHalf = inningHalf;
+								play.inning = inning.num;
+								playList.push(play);
+							}
 						}
-					}
-					else {
-						playGroup.inningHalf = inningHalf;
-						playGroup.inning = inning.num;
-						playList.push(playGroup);
-						
+						else {
+							playGroup.inningHalf = inningHalf;
+							playGroup.inning = inning.num;
+							playList.push(playGroup);
+
+						}
 					}
 				}
 			}
