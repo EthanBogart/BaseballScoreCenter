@@ -830,43 +830,6 @@ function drawGame (game) {
 	return gameWindow;
 }
 
-function arrangePlaysForMenu (plays) {
-	
-}
-
-function getPlayByPlayList (game) {
-	var extendedPBPCard;
-	
-	ajax(
-		{
-			url: 'http://m.mlb.com/gdcross/' + game.dir + '/game_events.xml',
-			type:'json',
-			async: true
-		},
-		function (data) {
-
-			var plays = data.game.inning;
-			var playList = arrangePlaysForMenu(plays);
-			
-			extendedPBPCard = new UI.Menu({
-				title: 'Plays',
-				status: {
-					separator: 'none'
-				},
-				items: playList
-			});
-
-			extendedPBPCard.on('click', 'back', function () {
-				gameCard.show();
-				extendedPBPCard.hide();
-				isExtendedPBPCard = false;
-			});
-		},
-		function(error) {
-		}
-	);
-}
-
 function showGame (game, viewState) {
 	// Immediately run ajax in order to get blurb
 	
