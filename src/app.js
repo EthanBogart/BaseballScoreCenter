@@ -162,10 +162,10 @@ function refreshDateWindow () {
 }
 
 function intervalRefresh () {
-	if ((new Date()).toDateString() !== selectedDate.toDateString() && !(gameCard.isBeingViewed && isGameBeingPlayed(gameCard.gameState))) {
+	if ((new Date()).toDateString() !== selectedDate.toDateString()) {
 		// Do nothing
 	}
-	else if (isBlurbView) {
+	else if (gameCard && gameCard.viewState === 'ExtendedPBPView') {
 		// Do nothing
 	}
 	else if (gameCard && gameCard.isBeingViewed) {
@@ -179,10 +179,6 @@ function intervalRefresh () {
 			requestGames(showMenu, gameMenu, selected.itemIndex, true);
 		});
 	}
-}
-
-function isGameBeingPlayed (status) {
-	return status === 'In Progress' || status === 'Delayed' || status === 'Manager Challenge';
 }
 
 function showMenu (games, itemIndex) {
@@ -399,7 +395,7 @@ function getGame(games, index) {
 	}
   	
   // Attributes that only apply to in progress games
-  if (isGameBeingPlayed(gameState)) {
+  if (status.status === 'In Progress' || status.status === 'Manager Challenge') {
     // Batter
     var batter = game.batter;
 		var batterDisplay = batter.name_display_roster;
@@ -830,58 +826,121 @@ function drawGame (game) {
 	return gameWindow;
 }
 
-function showGame (game, viewState) {
-	// Immediately run ajax in order to get blurb
+function arrangePlaysForMenu (plays) {
+	var playList = [];
+	var playTypes = ['action', 'atbat'];
+	var inningHalfs = ['top', 'bottom'];
+	for (var inningIndex in plays) {
+		var inning = plays[inningIndex];
+		for (var inningHalfIndex in inningHalfs) {
+			var inningHalf = inningHalfs[inningHalfIndex];
+			for (var playTypeIndex in playTypes) {
+				var playType = playTypes[playTypeIndex];
+				if (inning[inningHalf] && inning[inningHalf][playType]) {
+					var playGroup = inning[inningHalf][playType];
+					
+					if (playGroup.length > 1) {
+						for (var playIndex in playGroup) {
+							var play = playGroup[playIndex];
+							play.inningHalf = inningHalf;
+							play.inning = inning.num;
+							playList.push(play);
+						}
+					}
+					else {
+						playGroup.inningHalf = inningHalf;
+						playGroup.inning = inning.num;
+						playList.push(playGroup);
+						
+					}
+				}
+			}
+		}
+	}
+		
+	var menuPlays = [];
+	for (var menuPlayIndex in playList) {
 	
-// 	var blurbText = '';
-// 	var blurbCard;
-// 	var blurbTitle;
-// 	if (game.gameState !== 'In Progress') {
-// 		ajax(
-// 			{
-// 				url: 'http://m.mlb.com/gdcross/' + game.dir + '/gamecenter.xml',
-// 				type:'xml',
-// 				async: true
-// 			},
-// 			function (data) {
-
-// 				if (data.indexOf('wrap') !== -1) {
-// 					var spl = data.split('wrap');
-// 					var blurb = getBlurb(spl[1]);
-// 					if (blurb) {
-// 						blurbText = blurb;
-// 						blurbTitle = 'Game Wrap';
-// 					}
-// 				} 
-
-// 				if (blurbText.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '') === '') {
-// 					blurbText = getBlurb(data);
-// 					blurbTitle = 'Game Brief';
-// 				}
-
-// 				blurbCard = new UI.Card({
-// 					title: blurbTitle,
-// 					body: blurbText,
-// 					scrollable: true,
-// 					style: 'small',
-// 					status: {
-// 						separator: 'none'
-// 					}
-// 				});
-
-// 				blurbCard.on('click', 'back', function () {
-// 					gameCard.show();
-// 					blurbCard.hide();
-// 					isBlurbView = false;
-// 				});
-// 			},
-// 			function(error) {
-// 			}
-// 		);
-// 	}
+		var menuPlay = playList[menuPlayIndex];
+		var isScorePlay = typeof menuPlay.rbi !== 'undefined' ? (parseInt(menuPlay.rbi) > 1 ? ' (runs scored)' : ' (run scored)') : ''; 
+		
+		var playCard = new UI.Card({
+			body:	menuPlay.des,
+			scrollable: true,
+			status: {
+				separator: 'none'
+			}
+		});
+		
+		// Capitalizes word
+		menuPlay.inningHalf = menuPlay.inningHalf[0].toUpperCase() + menuPlay.inningHalf.slice(1, menuPlay.inningHalf.length);
+		var timeString = menuPlay.tfs_zulu || menuPlay.start_tfs_zulu;
+		var playTime = new Date(timeString);
+		var menuItem = {
+			title: (menuPlay.event + isScorePlay),
+			subtitle: menuPlay.inningHalf + ' ' + menuPlay.inning,
+			timeOfPlay: playTime, 
+			card: playCard
+		};
+		
+		menuPlays.push(menuItem);
+	}
 	
+	menuPlays.sort(function (a,b) {
+		return b.timeOfPlay.valueOf() - a.timeOfPlay.valueOf();
+	});
 	
-  var attributes = game.attributes;
+	return menuPlays;
+	
+}
+
+
+
+function showGame (game, viewState) {	
+ 
+	var extendedPBPCard;
+	
+	ajax(
+		{
+			url: 'http://m.mlb.com/gdcross/' + game.dir + '/game_events.json',
+			type:'json',
+			async: true
+		},
+		function (data) {
+
+			var plays = data.data.game.inning;
+			var playList = arrangePlaysForMenu(plays);
+			var highlightBColor = Platform.version() === 'aplite' ? 'black' : '#55FFFF';
+			var highlightTColor = Platform.version() === 'aplite' ? 'white' : 'black';
+
+			extendedPBPCard = new UI.Menu({
+				title: 'Plays',
+				highlightBackgroundColor: highlightBColor,
+				highlightTextColor: highlightTColor,
+				status: {
+					separator: 'none'
+				},
+				sections: [{
+					items: playList
+				}]
+			});
+			
+			extendedPBPCard.on('click', 'back', function () {
+				extendedPBPCard.hide();
+				gameCard.viewState = 'GameView';
+				intervalRefresh();
+			});
+	
+			extendedPBPCard.on('select', function (selection) {
+				selection.item.card.show();
+			});
+			
+		},
+		function(error) {
+		}
+	);
+	
+	var attributes = game.attributes;
   var gameText = '';
 	var subtitle = '';
 	var style = 'small';
@@ -892,17 +951,17 @@ function showGame (game, viewState) {
 	var gameDrawn = false;
 	
   if (typeof attributes !== 'undefined') {
-    if (isGameBeingPlayed(game.gameState)) {
+    if (game.gameState === 'In Progress' || game.status === 'Manager Challenge') {
 			matchupText = attributes.pitcherName + '\n (' + attributes.pitcherStats + ')\n' + attributes.batterName + '\n ('+ attributes.batterStats + ')';
 			gameCard = drawGame(game);
 			gameDrawn = true;
     }
     else if (game.gameState === 'Final' || game.gameState === 'Game Over') {
-			if (!gameViewedHasEnded && typeof gameViewedHasEnded !== null && vibrateGameEnd) {
+			if (!gameViewedHasEnded && gameViewedHasEnded !== null && vibrateGameEnd) {
 				UI.Vibe.vibrate('long');
 				gameViewedHasEnded = true;
 			}
-			else if (!gameViewedHasEnded && typeof gameViewedHasEnded === null) {
+			else if (!gameViewedHasEnded && gameViewedHasEnded === null) {
 				gameViewedHasEnded = false;
 			}
       var winner = attributes.wp;
@@ -1015,6 +1074,13 @@ function showGame (game, viewState) {
 		refreshGame(game.UID, gameCard);
 	});
 	
+	gameCard.on('longClick', 'up', function () {
+		if (typeof extendedPBPCard !== 'undefined') {
+			extendedPBPCard.show();
+			gameCard.viewState = 'ExtendedPBPView';
+		}
+	});
+	
 	gameCard.on('click', 'up', function () {
 		if (game.pbpText) {
 			pbpCard.show();
@@ -1029,13 +1095,6 @@ function showGame (game, viewState) {
 				gameCard.hide();
 				gameCard.viewState = 'MatchupView';
 			}
-	});
-	
-	gameCard.on('click', 'select', function () {
-		if (blurbText !== '') {
-			blurbCard.show();
-			isBlurbView = true;
-		}
 	});
 	
 	gameCard.on('click', 'back', function () {
@@ -1083,9 +1142,9 @@ function gameSort (a,b) {
 	var bTime = getDateObj(b).getTime();
 	
 	if (a.status.status !== b.status.status) {
-		if (isGameBeingPlayed(a.status.status)) {
+		if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
 			return -1;
-		} else if (isGameBeingPlayed(b.status.status)) {
+		} else if (b.status.status === 'In Progress' || b.status.status === 'Manager Challenge') {
 			return 1;
 		} else if (a.status.status === 'Final' || a.status.status === 'Game Over') {
 			return 1;
