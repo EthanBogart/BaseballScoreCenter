@@ -162,7 +162,7 @@ function refreshDateWindow () {
 }
 
 function intervalRefresh () {
-	if ((new Date()).toDateString() !== selectedDate.toDateString()) {
+	if ((new Date()).toDateString() !== selectedDate.toDateString() && !(gameCard.isBeingViewed && isGameBeingPlayed(gameCard.gameState))) {
 		// Do nothing
 	}
 	else if (isBlurbView) {
@@ -179,6 +179,10 @@ function intervalRefresh () {
 			requestGames(showMenu, gameMenu, selected.itemIndex, true);
 		});
 	}
+}
+
+function isGameBeingPlayed (status) {
+	return status === 'In Progress' || status === 'Delayed' || status === 'Manager Challenge';
 }
 
 function showMenu (games, itemIndex) {
@@ -395,7 +399,7 @@ function getGame(games, index) {
 	}
   	
   // Attributes that only apply to in progress games
-  if (status.status === 'In Progress' || status.status === 'Manager Challenge') {
+  if (isGameBeingPlayed(gameState)) {
     // Batter
     var batter = game.batter;
 		var batterDisplay = batter.name_display_roster;
@@ -826,6 +830,43 @@ function drawGame (game) {
 	return gameWindow;
 }
 
+function arrangePlaysForMenu (plays) {
+	
+}
+
+function getPlayByPlayList (game) {
+	var extendedPBPCard;
+	
+	ajax(
+		{
+			url: 'http://m.mlb.com/gdcross/' + game.dir + '/game_events.xml',
+			type:'json',
+			async: true
+		},
+		function (data) {
+
+			var plays = data.game.inning;
+			var playList = arrangePlaysForMenu(plays);
+			
+			extendedPBPCard = new UI.Menu({
+				title: 'Plays',
+				status: {
+					separator: 'none'
+				},
+				items: playList
+			});
+
+			extendedPBPCard.on('click', 'back', function () {
+				gameCard.show();
+				extendedPBPCard.hide();
+				isExtendedPBPCard = false;
+			});
+		},
+		function(error) {
+		}
+	);
+}
+
 function showGame (game, viewState) {
 	// Immediately run ajax in order to get blurb
 	
@@ -888,7 +929,7 @@ function showGame (game, viewState) {
 	var gameDrawn = false;
 	
   if (typeof attributes !== 'undefined') {
-    if (game.gameState === 'In Progress' || game.status === 'Manager Challenge') {
+    if (isGameBeingPlayed(game.gameState)) {
 			matchupText = attributes.pitcherName + '\n (' + attributes.pitcherStats + ')\n' + attributes.batterName + '\n ('+ attributes.batterStats + ')';
 			gameCard = drawGame(game);
 			gameDrawn = true;
@@ -1079,9 +1120,9 @@ function gameSort (a,b) {
 	var bTime = getDateObj(b).getTime();
 	
 	if (a.status.status !== b.status.status) {
-		if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
+		if (isGameBeingPlayed(a.status.status)) {
 			return -1;
-		} else if (b.status.status === 'In Progress' || b.status.status === 'Manager Challenge') {
+		} else if (isGameBeingPlayed(b.status.status)) {
 			return 1;
 		} else if (a.status.status === 'Final' || a.status.status === 'Game Over') {
 			return 1;
