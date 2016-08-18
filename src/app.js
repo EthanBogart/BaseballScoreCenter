@@ -180,6 +180,17 @@ function intervalRefresh () {
 	}
 }
 
+
+function getMobileOperatingSystem() {
+  var userAgent = navigator.userAgent || navigator.vendor;
+	if (/android/i.test(userAgent)) {
+		return "Android";
+	}
+
+	console.log(JSON.stringify(navigator));
+	return "iOS";
+}
+
 function showMenu (games, itemIndex) {
 	var menuList = arrangeGamesForMenu(games);
 	
@@ -587,7 +598,7 @@ function findGame (games, gameId) {
 
 function getDateObj (game) {
 	var dateString = selectedDate.toJSON().split('T')[0];
-	
+	var dateList = dateString.split('-');
 	var givenTime = game.time_aw_lg;
 	var timeSpl = game.time_aw_lg.split(':');
 	var offset = game.time_zone_aw_lg;
@@ -595,15 +606,19 @@ function getDateObj (game) {
 	if (offset.length > 1) {
 		offset = offset[1];
 	}
-	
 	// I'm fairly certain a game won't be scheduled past 12:00AM
 	if (game.ampm === 'PM' && timeSpl[0] !== '12') {
 		givenTime = (parseInt(timeSpl[0]) + 12).toString() + ':' + timeSpl[1];
 	}
+	var givenHour = parseInt(givenTime.split(':')[0]);
+	var givenMinute = parseInt(givenTime.split(':')[1]);
+
+	var d = new Date(parseInt(dateList[0]), parseInt(dateList[1]), parseInt(dateList[2]), givenHour+1, givenMinute);
+	d.setTime( d.getTime() - (parseInt(offset) * 60 * 60 * 1000) );
+// 	var newDate = new Date(parseInt(dateString[0]), parseInt(dateString[1]),
+// 								parseInt(dateString[2]), parseInt(givenTime) + '-0' + offset + '00');
 	
-	var newDate = new Date(dateString + 'T' + givenTime + '-0' + offset + '00');
-	
-	return newDate;
+	return d;
 }
 
 function getLocalTime (game) {
