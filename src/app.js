@@ -915,49 +915,6 @@ function arrangePlaysForMenu (plays) {
 
 
 function showGame (game, viewState) {	
- 
-	var extendedPBPCard;
-	
-	ajax(
-		{
-			url: 'http://m.mlb.com/gdcross/' + game.dir + '/game_events.json',
-			type:'json',
-			async: true
-		},
-		function (data) {
-
-			var plays = data.data.game.inning;
-			var playList = arrangePlaysForMenu(plays);
-			var highlightBColor = Platform.version() === 'aplite' ? 'black' : '#55FFFF';
-			var highlightTColor = Platform.version() === 'aplite' ? 'white' : 'black';
-
-			extendedPBPCard = new UI.Menu({
-				title: 'Plays',
-				highlightBackgroundColor: highlightBColor,
-				highlightTextColor: highlightTColor,
-				status: {
-					separator: 'none'
-				},
-				sections: [{
-					items: playList
-				}]
-			});
-			
-			extendedPBPCard.on('click', 'back', function () {
-				extendedPBPCard.hide();
-				gameCard.viewState = 'GameView';
-				intervalRefresh();
-			});
-	
-			extendedPBPCard.on('select', function (selection) {
-				selection.item.card.show();
-			});
-			
-		},
-		function(error) {
-		}
-	);
-	
 	var attributes = game.attributes;
   var gameText = '';
 	var subtitle = '';
@@ -1093,10 +1050,49 @@ function showGame (game, viewState) {
 	});
 	
 	gameCard.on('longClick', 'up', function () {
-		if (typeof extendedPBPCard !== 'undefined') {
-			extendedPBPCard.show();
-			gameCard.viewState = 'ExtendedPBPView';
-		}
+		ajax(
+			{
+				url: 'http://m.mlb.com/gdcross/' + game.dir + '/game_events.json',
+				type:'json',
+				async: true
+			},
+			function (data) {
+
+				var plays = data.data.game.inning;
+				var playList = arrangePlaysForMenu(plays);
+				var highlightBColor = Platform.version() === 'aplite' ? 'black' : '#55FFFF';
+				var highlightTColor = Platform.version() === 'aplite' ? 'white' : 'black';
+
+				var extendedPBPCard = new UI.Menu({
+					title: 'Plays',
+					highlightBackgroundColor: highlightBColor,
+					highlightTextColor: highlightTColor,
+					status: {
+						separator: 'none'
+					},
+					sections: [{
+						items: playList
+					}]
+				});
+
+				extendedPBPCard.on('click', 'back', function () {
+					extendedPBPCard.hide();
+					gameCard.viewState = 'GameView';
+					intervalRefresh();
+				});
+
+				extendedPBPCard.on('select', function (selection) {
+					selection.item.card.show();
+				});
+				
+				gameCard.viewState = 'ExtendedPBPView';
+				extendedPBPCard.show();
+
+			},
+			function(error) {
+				UI.Vibe.vibrate('double');
+			}
+		);
 	});
 	
 	gameCard.on('click', 'up', function () {
@@ -1122,7 +1118,6 @@ function showGame (game, viewState) {
 		gameViewedHasEnded = null;
 		scoreKey = '';
 	});
-	
 
 	console.log(viewState);
 	if (viewState === 'MatchupView' && matchupText) {
