@@ -35,6 +35,7 @@ var scoreKey = '';
 var vibrateDisconnect = false;
 var vibrateScoreChange = false;
 var vibrateGameEnd = false;
+var lightScoreChange = false;
 var hasDisconnected = false;
 var onlyShowFavorites = false;
 var gameViewedHasEnded = null;
@@ -49,6 +50,10 @@ for (var opt in settings.vibrateOpts) {
 	else if (settings.vibrateOpts[opt] === 'gameEnd') {
 		vibrateGameEnd = true;
 	}
+}
+
+if (settings.lightOps && settings.lightOps.length > 0) {
+	lightScoreChange = true;
 }
 
 if (settings.onlyShowFav && settings.onlyShowFav.length === 1) {
@@ -93,6 +98,10 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		else if (dict.vibrateOpts[opt] === 'gameEnd') {
 			vibrateGameEnd = true;
 		}
+	}
+	
+	if (settings.lightOps.length > 0) {
+		lightScoreChange = true;
 	}
 	
 	intervalRefresh();
@@ -178,17 +187,6 @@ function intervalRefresh () {
 			requestGames(showMenu, gameMenu, selected.itemIndex, true);
 		});
 	}
-}
-
-
-function getMobileOperatingSystem() {
-  var userAgent = navigator.userAgent || navigator.vendor;
-	if (/android/i.test(userAgent)) {
-		return "Android";
-	}
-
-	console.log(JSON.stringify(navigator));
-	return "iOS";
 }
 
 function showMenu (games, itemIndex) {
@@ -798,7 +796,7 @@ function drawGame (game) {
 
 	var inning = game.inningState + ' ' + game.inning;
 	var iText = new UI.Text({
-		position: new Vector2(0, 108),
+		position: new Vector2(0, 109),
 		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-24-bold',
 		text: inning,
@@ -1040,8 +1038,13 @@ function showGame (game, viewState) {
 	if (scoreKey === '') {
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
-	else if (gameCardScoreKey !== scoreKey && vibrateScoreChange) {
-		UI.Vibe.vibrate('short');
+	else if (gameCardScoreKey !== scoreKey) {
+		if (vibrateScoreChange) {
+			UI.Vibe.vibrate('short');
+		}
+		if (lightScoreChange) {
+			UI.Light.on('long');
+		}
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
 	
