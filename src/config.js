@@ -442,6 +442,18 @@ module.exports = [
 		]
 	},
 	{
+		"type": "checkboxgroup",
+		"appKey": "lightOps",
+		"label": "Light on:",
+		"defaultValue": [],
+		"options": [
+			{
+				"label": "Score change",
+				"value": "scoreChange"
+			}
+		]
+	},
+	{
 		"type": "slider",
 		"appKey": "refreshRate",
 		"defaultValue": 30,

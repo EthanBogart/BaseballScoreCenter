@@ -35,6 +35,7 @@ var scoreKey = '';
 var vibrateDisconnect = false;
 var vibrateScoreChange = false;
 var vibrateGameEnd = false;
+var lightScoreChange = false;
 var hasDisconnected = false;
 var onlyShowFavorites = false;
 var gameViewedHasEnded = null;
@@ -49,6 +50,10 @@ for (var opt in settings.vibrateOpts) {
 	else if (settings.vibrateOpts[opt] === 'gameEnd') {
 		vibrateGameEnd = true;
 	}
+}
+
+if (settings.lightOps && settings.lightOps.length > 0) {
+	lightScoreChange = true;
 }
 
 if (settings.onlyShowFav && settings.onlyShowFav.length === 1) {
@@ -93,6 +98,10 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		else if (dict.vibrateOpts[opt] === 'gameEnd') {
 			vibrateGameEnd = true;
 		}
+	}
+	
+	if (settings.lightOps.length > 0) {
+		lightScoreChange = true;
 	}
 	
 	intervalRefresh();
@@ -178,17 +187,6 @@ function intervalRefresh () {
 			requestGames(showMenu, gameMenu, selected.itemIndex, true);
 		});
 	}
-}
-
-
-function getMobileOperatingSystem() {
-  var userAgent = navigator.userAgent || navigator.vendor;
-	if (/android/i.test(userAgent)) {
-		return "Android";
-	}
-
-	console.log(JSON.stringify(navigator));
-	return "iOS";
 }
 
 function showMenu (games, itemIndex) {
@@ -798,7 +796,7 @@ function drawGame (game) {
 
 	var inning = game.inningState + ' ' + game.inning;
 	var iText = new UI.Text({
-		position: new Vector2(0, 108),
+		position: new Vector2(0, 109),
 		size: new Vector2(180 * (adjuster/180), 14),
 		font: 'gothic-24-bold',
 		text: inning,
@@ -915,49 +913,6 @@ function arrangePlaysForMenu (plays) {
 
 
 function showGame (game, viewState) {	
- 
-	var extendedPBPCard;
-	
-	ajax(
-		{
-			url: 'http://m.mlb.com/gdcross/' + game.dir + '/game_events.json',
-			type:'json',
-			async: true
-		},
-		function (data) {
-
-			var plays = data.data.game.inning;
-			var playList = arrangePlaysForMenu(plays);
-			var highlightBColor = Platform.version() === 'aplite' ? 'black' : '#55FFFF';
-			var highlightTColor = Platform.version() === 'aplite' ? 'white' : 'black';
-
-			extendedPBPCard = new UI.Menu({
-				title: 'Plays',
-				highlightBackgroundColor: highlightBColor,
-				highlightTextColor: highlightTColor,
-				status: {
-					separator: 'none'
-				},
-				sections: [{
-					items: playList
-				}]
-			});
-			
-			extendedPBPCard.on('click', 'back', function () {
-				extendedPBPCard.hide();
-				gameCard.viewState = 'GameView';
-				intervalRefresh();
-			});
-	
-			extendedPBPCard.on('select', function (selection) {
-				selection.item.card.show();
-			});
-			
-		},
-		function(error) {
-		}
-	);
-	
 	var attributes = game.attributes;
   var gameText = '';
 	var subtitle = '';
@@ -1083,8 +1038,13 @@ function showGame (game, viewState) {
 	if (scoreKey === '') {
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
-	else if (gameCardScoreKey !== scoreKey && vibrateScoreChange) {
-		UI.Vibe.vibrate('short');
+	else if (gameCardScoreKey !== scoreKey) {
+		if (vibrateScoreChange) {
+			UI.Vibe.vibrate('short');
+		}
+		if (lightScoreChange) {
+			UI.Light.on('long');
+		}
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
 	
@@ -1093,10 +1053,49 @@ function showGame (game, viewState) {
 	});
 	
 	gameCard.on('longClick', 'up', function () {
-		if (typeof extendedPBPCard !== 'undefined') {
-			extendedPBPCard.show();
-			gameCard.viewState = 'ExtendedPBPView';
-		}
+		ajax(
+			{
+				url: 'http://m.mlb.com/gdcross/' + game.dir + '/game_events.json',
+				type:'json',
+				async: true
+			},
+			function (data) {
+
+				var plays = data.data.game.inning;
+				var playList = arrangePlaysForMenu(plays);
+				var highlightBColor = Platform.version() === 'aplite' ? 'black' : '#55FFFF';
+				var highlightTColor = Platform.version() === 'aplite' ? 'white' : 'black';
+
+				var extendedPBPCard = new UI.Menu({
+					title: 'Plays',
+					highlightBackgroundColor: highlightBColor,
+					highlightTextColor: highlightTColor,
+					status: {
+						separator: 'none'
+					},
+					sections: [{
+						items: playList
+					}]
+				});
+
+				extendedPBPCard.on('click', 'back', function () {
+					extendedPBPCard.hide();
+					gameCard.viewState = 'GameView';
+					intervalRefresh();
+				});
+
+				extendedPBPCard.on('select', function (selection) {
+					selection.item.card.show();
+				});
+				
+				gameCard.viewState = 'ExtendedPBPView';
+				extendedPBPCard.show();
+
+			},
+			function(error) {
+				UI.Vibe.vibrate('double');
+			}
+		);
 	});
 	
 	gameCard.on('click', 'up', function () {
@@ -1122,7 +1121,6 @@ function showGame (game, viewState) {
 		gameViewedHasEnded = null;
 		scoreKey = '';
 	});
-	
 
 	console.log(viewState);
 	if (viewState === 'MatchupView' && matchupText) {
