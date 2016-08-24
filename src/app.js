@@ -28,6 +28,8 @@ for (var keyIndex in identifierKeys) {
 	}
 }
 
+console.log(FAVORITE_TEAM_IDENTIFIERS);
+
 var refreshInterval;
 var isStartup = true;
 var timeToRefresh = (settings.refreshRate * 1000) || 30000;
@@ -100,7 +102,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		}
 	}
 	
-	if (settings.lightOps.length > 0) {
+	if (settings.lightOps && settings.lightOps.length > 0) {
 		lightScoreChange = true;
 	}
 	
