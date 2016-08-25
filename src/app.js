@@ -28,8 +28,6 @@ for (var keyIndex in identifierKeys) {
 	}
 }
 
-console.log(FAVORITE_TEAM_IDENTIFIERS);
-
 var refreshInterval;
 var isStartup = true;
 var timeToRefresh = (settings.refreshRate * 1000) || 30000;
@@ -1045,7 +1043,7 @@ function showGame (game, viewState) {
 			UI.Vibe.vibrate('short');
 		}
 		if (lightScoreChange) {
-			UI.Light.on('long');
+			UI.Light.on('short');
 		}
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
