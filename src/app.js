@@ -1043,7 +1043,7 @@ function showGame (game, viewState) {
 			UI.Vibe.vibrate('short');
 		}
 		if (lightScoreChange) {
-			UI.Light.on('short');
+			UI.Light.trigger();
 		}
 		scoreKey = game.homeScore + '-' + game.awayScore;
 	}
