@@ -611,7 +611,9 @@ function getDateObj (game) {
 	var givenHour = parseInt(givenTime.split(':')[0]);
 	var givenMinute = parseInt(givenTime.split(':')[1]);
 
-	var d = new Date(parseInt(dateList[0]), parseInt(dateList[1]), parseInt(dateList[2]), givenHour+1, givenMinute);
+	// Hacky solution to get around poor timezone support
+	var hourWithOffset = givenHour + 1 + (7 - ((new Date()).getTimezoneOffset()/60));
+	var d = new Date(parseInt(dateList[0]), parseInt(dateList[1])-1, parseInt(dateList[2])-1, hourWithOffset, givenMinute);
 	d.setTime( d.getTime() - (parseInt(offset) * 60 * 60 * 1000) );
 // 	var newDate = new Date(parseInt(dateString[0]), parseInt(dateString[1]),
 // 								parseInt(dateString[2]), parseInt(givenTime) + '-0' + offset + '00');
