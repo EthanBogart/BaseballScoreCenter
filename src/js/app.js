@@ -924,7 +924,7 @@ function showGame (game, viewState) {
 	var gameDrawn = false;
 	
   if (typeof attributes !== 'undefined') {
-    if (game.gameState === 'In Progress' || game.status.toLowerCase().indexOf('challenge') !== -1) {
+    if (game.gameState === 'In Progress' || game.gameState.toLowerCase().indexOf('challenge') !== -1) {
 			matchupText = attributes.pitcherName + '\n (' + attributes.pitcherStats + ')\n' + attributes.batterName + '\n ('+ attributes.batterStats + ')';
 			gameCard = drawGame(game);
 			gameDrawn = true;
