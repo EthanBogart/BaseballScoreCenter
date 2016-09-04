@@ -403,7 +403,7 @@ function getGame(games, index) {
 	}
   	
   // Attributes that only apply to in progress games
-  if (status.status === 'In Progress' || status.status === 'Manager Challenge') {
+  if (status.status === 'In Progress' || status.status.toLowerCase().indexOf('challenge') !== -1) {
     // Batter
     var batter = game.batter;
 		var batterDisplay = batter.name_display_roster;
@@ -910,8 +910,6 @@ function arrangePlaysForMenu (plays) {
 	
 }
 
-
-
 function showGame (game, viewState) {	
 	var attributes = game.attributes;
   var gameText = '';
@@ -924,7 +922,7 @@ function showGame (game, viewState) {
 	var gameDrawn = false;
 	
   if (typeof attributes !== 'undefined') {
-    if (game.gameState === 'In Progress' || game.status === 'Manager Challenge') {
+    if (game.gameState === 'In Progress' || game.status.toLowerCase().indexOf('challenge') !== -1) {
 			matchupText = attributes.pitcherName + '\n (' + attributes.pitcherStats + ')\n' + attributes.batterName + '\n ('+ attributes.batterStats + ')';
 			gameCard = drawGame(game);
 			gameDrawn = true;
@@ -1158,9 +1156,9 @@ function gameSort (a,b) {
 	var bTime = getDateObj(b).getTime();
 	
 	if (a.status.status !== b.status.status) {
-		if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
+		if (a.status.status === 'In Progress' || a.status.status.toLowerCase().indexOf('challenge') !== -1) {
 			return -1;
-		} else if (b.status.status === 'In Progress' || b.status.status === 'Manager Challenge') {
+		} else if (b.status.status === 'In Progress' || b.status.status.toLowerCase().indexOf('challenge') !== -1) {
 			return 1;
 		} else if (a.status.status === 'Final' || a.status.status === 'Game Over') {
 			return 1;
@@ -1168,7 +1166,7 @@ function gameSort (a,b) {
 			return -1;
 		}
 	}
-	else if (a.status.status === 'In Progress' || a.status.status === 'Manager Challenge') {
+	else if (a.status.status === 'In Progress' || a.status.status.toLowerCase().indexOf('challenge') !== -1) {
 		return bTime - aTime;
 	}
 	return aTime - bTime;
