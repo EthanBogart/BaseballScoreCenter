@@ -418,6 +418,18 @@ module.exports = [
 						"value": "showFav"
 					}
 				],
+			},
+			{
+				"type": "checkboxgroup",
+				"appKey": "subscribe",
+				"label": "Timeline",
+				"defaultValue": [],
+				"options": [
+					{
+						"label": "Puts favorite teams on your timeline",
+						"value": "timelineSubscribe"
+					}
+				]
 			}
 		]
   },

@@ -1,9 +1,3 @@
-/**
- * Welcome to Pebble.js!
- *
- * This is where you write your app.
- */
-
 var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
@@ -88,6 +82,13 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		}
 	}
 	
+	if (dict.subscribe && dict.subscribe.length > 0) {
+		manageSubscriptions();
+	}
+	else {
+		unsubscribeAll();
+	}
+	
 	for (var opt in dict.vibrateOpts) {
 		if (dict.vibrateOpts[opt] === 'disconnect') {
 			vibrateDisconnect = true;
@@ -100,7 +101,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		}
 	}
 	
-	if (settings.lightOps && settings.lightOps.length > 0) {
+	if (dict.lightOps && dict.lightOps.length > 0) {
 		lightScoreChange = true;
 	}
 	
@@ -125,8 +126,13 @@ var dateSelectWindow = new UI.Window({
 dateSelectWindow.isBeingViewed = false;
 
 var dateString = selectedDate.toDateString();
+var platformName = Platform.version();
+var dTextXPos = platformName === 'chalk' ? -14 : -34;
+var dateSpl = dateString.split(' ');
+dateSpl.pop();
+dateString = platformName === 'chalk' ? dateString : dateSpl.join(' ');
 var dateText = new UI.Text({
-	position: new Vector2(-14, 70),
+	position: new Vector2(dTextXPos, 70),
 	size: new Vector2(180, 180),
 	font: 'gothic-24',
 	text: dateString,
@@ -154,8 +160,11 @@ dateSelectWindow.on('click', 'down', function() {
 
 function refreshDateWindow () {
 	var newDateString = selectedDate.toDateString();
+	var newDateSpl = newDateString.split(' ');
+	newDateSpl.pop();
+	newDateString = platformName === 'chalk' ? newDateString : newDateSpl.join(' ');
 	var newDateText = new UI.Text({
-		position: new Vector2(-14, 70),
+		position: new Vector2(dTextXPos, 70),
 		size: new Vector2(180, 180),
 		font: 'gothic-24',
 		text: newDateString,
@@ -273,7 +282,7 @@ function arrangeGamesForMenu (games) {
 			}
 			else {
 				if(!game.status.inning_state && (game.status.inning === '1' || game.status.inning === '')) {
-					subtitleText = '@ ' + getLocalTime(game) + ' (warmup)';
+					subtitleText = getLocalTime(game) + ' (warmup)';
 				}
 				else {
 					subtitleText = game.status.inning_state + ' ' + game.status.inning;
@@ -281,7 +290,7 @@ function arrangeGamesForMenu (games) {
 			}
 		}
 		else {
-			titleText = game.away_name_abbrev + ' @ ' + game.home_name_abbrev;
+			titleText = game.away_name_abbrev + ' at ' + game.home_name_abbrev;
 			subtitleText = getLocalTime(game);
 		}
 		
@@ -630,19 +639,6 @@ function getLocalTime (game) {
 	return hours + ':' + (minutes.length > 1 ? minutes : ('0' + minutes)) + ' ' + ampm;
 }
 
-// Actually the worst code I've ever written
-// PebbleJS does not provide a DOM parser
-// function getBlurb (data) {
-// 	var spl = data.split('<blurb>');
-// 	if (spl.length > 1) {
-// 		var bStart = spl[1];
-// 		var bspl = bStart.split(']]>');
-// 		var bracketspl = bspl[0].split('TA[');
-// 		return bracketspl[1];
-// 	}
-// 	return null;
-// }
-
 function drawGame (game) {
 	var elementList = [];
 	var adjuster = 180;
@@ -815,7 +811,7 @@ function drawGame (game) {
 		text: 'P: ' + game.attributes.pitcherDisplay,
 		color: 'black',
 		textAlign: 'center',
-		backgroundColor: 'white'
+		clear: 'true'
 	});
 	elementList.push(pText);
 
@@ -1172,6 +1168,58 @@ function gameSort (a,b) {
 		return bTime - aTime;
 	}
 	return aTime - bTime;
+}
+
+function manageSubscriptions () {
+	Pebble.timelineSubscriptions(function(teams) {
+		for (var teamI in teams) {
+			var team = teams[teamI];
+			if (!contains(team, FAVORITE_TEAM_IDENTIFIERS)) {
+				Pebble.timelineUnsubscribe(team, function() {
+				}, function(err) {
+					console.log('Error subscribing to topic: ' + err);
+				});
+			}
+		}
+
+		for (var teamI in FAVORITE_TEAM_IDENTIFIERS) {
+			var team = FAVORITE_TEAM_IDENTIFIERS[teamI];
+			if (!contains(team, teams)) {
+				Pebble.timelineSubscribe(team, function() {
+				}, function(err) {
+					console.log('Error subscribing to topic: ' + err);
+				});
+			}
+		}
+	}, function(errorString) {
+		console.log('Error getting subscriptions: ' + errorString);
+	});
+}
+
+function unsubscribeAll () {
+	Pebble.timelineSubscriptions(function(teams) {
+		for (var teamI in teams) {
+			var team = teams[teamI];
+			
+			Pebble.timelineUnsubscribe(team, function() {
+				console.log('Unsubscribed to ' + team);
+			}, function(err) {
+				console.log('Error subscribing to topic: ' + err);
+			});
+		}
+	}, function(errorString) {
+		console.log('Error getting subscriptions: ' + errorString);
+	});
+}
+
+function contains (itemA, list) {
+	for (var item in list) {
+		var itemB = list[item];
+		if (itemA === itemB) {
+			return true;
+		}
+	}
+	return false;
 }
 
 main.show();
