@@ -367,11 +367,11 @@ function getURL () {
 	
 	var date = [];
 	date.push(selectedDate.getFullYear());
-	date.push(selectedDate.getMonth());
+	date.push(selectedDate.getMonth() + 1);
 	date.push(selectedDate.getDate());
 	
 	// Month is given from 0-11
-	var month = (date[1] + 1).toString();
+	var month = (date[1]).toString();
 	if (month.length === 1) {
 		date[1] = '0' + month;
 	}
@@ -388,7 +388,6 @@ function getURL () {
 	var scoreText = 'master_scoreboard.json';
 	
 	var ballurl = baseUrl + urlyear + urlmonth + urlday + scoreText;
-	
 	return ballurl;
 }
 
