@@ -336,6 +336,11 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 			}
 			
 			var games = data.data.games.game;
+			
+			if (!Array.isArray(games)) {
+				games = [games];
+			}
+			
 			games.sort(gameSort);
       showMenu(games, itemIndex);
 			dateSelectWindow.hide();
