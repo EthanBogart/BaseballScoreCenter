@@ -267,44 +267,47 @@ function arrangeGamesForMenu (games) {
 	
 	for (var index in games) {
 		var game = games[index];
-		var titleText = '';
-		var subtitleText = '';
 		
-		// Simple check that the game has started
-		if (game.linescore) {
-			var homeScore = game.linescore.r.home;
-			var awayScore = game.linescore.r.away;
-			titleText = game.away_name_abbrev + ': ' + awayScore + ' - ' +
-					game.home_name_abbrev + ': ' + homeScore;
-			if (game.status.status === 'Final' || game.status.status === 'Game Over') {
-				var extras = parseFloat(game.status.inning) > 9 ? '/' + game.status.inning : '';
-				titleText = titleText + ' (F' + extras + ')';
-			}
-			else {
-				if(!game.status.inning_state && (game.status.inning === '1' || game.status.inning === '')) {
-					subtitleText = getLocalTime(game) + ' (warmup)';
+		if (game) {
+			var titleText = '';
+			var subtitleText = '';
+
+			// Simple check that the game has started
+			if (game.linescore) {
+				var homeScore = game.linescore.r.home;
+				var awayScore = game.linescore.r.away;
+				titleText = game.away_name_abbrev + ': ' + awayScore + ' - ' +
+						game.home_name_abbrev + ': ' + homeScore;
+				if (game.status.status === 'Final' || game.status.status === 'Game Over') {
+					var extras = parseFloat(game.status.inning) > 9 ? '/' + game.status.inning : '';
+					titleText = titleText + ' (F' + extras + ')';
 				}
 				else {
-					subtitleText = game.status.inning_state + ' ' + game.status.inning;
+					if(!game.status.inning_state && (game.status.inning === '1' || game.status.inning === '')) {
+						subtitleText = getLocalTime(game) + ' (warmup)';
+					}
+					else {
+						subtitleText = game.status.inning_state + ' ' + game.status.inning;
+					}
 				}
 			}
-		}
-		else {
-			titleText = game.away_name_abbrev + ' at ' + game.home_name_abbrev;
-			subtitleText = getLocalTime(game);
-		}
-		
-		if (onlyShowFavorites && checkForFavorite(game)) {
-			menuList.push({
-				title: titleText,
-				subtitle: subtitleText
-			});
-		}
-		else if (!onlyShowFavorites) {
-			menuList.push({
-				title: titleText,
-				subtitle: subtitleText
-			});
+			else {
+				titleText = game.away_name_abbrev + ' at ' + game.home_name_abbrev;
+				subtitleText = getLocalTime(game);
+			}
+
+			if (onlyShowFavorites && checkForFavorite(game)) {
+				menuList.push({
+					title: titleText,
+					subtitle: subtitleText
+				});
+			}
+			else if (!onlyShowFavorites) {
+				menuList.push({
+					title: titleText,
+					subtitle: subtitleText
+				});
+			}
 		}
 	}
 	
@@ -335,7 +338,14 @@ function requestGames (showMenu, loadView, itemIndex, isAuto) {
 				UI.Vibe.vibrate('short');
 			}
 			
-			var games = data.data.games.game;
+			var games;
+			
+			try {
+				games = data.data.games.game;
+			}
+			catch (err) {
+				games = [];
+			}
 			
 			if (!Array.isArray(games)) {
 				games = [games];
