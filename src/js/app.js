@@ -83,7 +83,10 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	}
 	
 	if (dict.subscribe && dict.subscribe.length > 0) {
-		manageSubscriptions();
+		// Boolean values that determine which events to subscribe to
+		var favorites = contains('timelineSubscribe', dict.subscribe);
+		var playoffs = contains('playoffSubscribe', dict.subscribe);
+		manageSubscriptions(favorites, playoffs);
 	}
 	else {
 		unsubscribeAll();
@@ -1184,11 +1187,21 @@ function gameSort (a,b) {
 	return aTime - bTime;
 }
 
-function manageSubscriptions () {
+function manageSubscriptions (favorites, playoffs) {
+	var subscriptions = [];
+	
+	if (favorites) {
+		subscriptions = FAVORITE_TEAM_IDENTIFIERS;
+	}
+	if (playoffs) {
+		subscriptions.push('playoffs');
+	}
+	
+	
 	Pebble.timelineSubscriptions(function(teams) {
 		for (var teamI in teams) {
 			var team = teams[teamI];
-			if (!contains(team, FAVORITE_TEAM_IDENTIFIERS)) {
+			if (!contains(team, subscriptions)) {
 				Pebble.timelineUnsubscribe(team, function() {
 				}, function(err) {
 					console.log('Error subscribing to topic: ' + err);
@@ -1196,8 +1209,8 @@ function manageSubscriptions () {
 			}
 		}
 
-		for (var teamI in FAVORITE_TEAM_IDENTIFIERS) {
-			var team = FAVORITE_TEAM_IDENTIFIERS[teamI];
+		for (var teamI in subscriptions) {
+			var team = subscriptions[teamI];
 			if (!contains(team, teams)) {
 				Pebble.timelineSubscribe(team, function() {
 				}, function(err) {

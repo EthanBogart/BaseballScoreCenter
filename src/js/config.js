@@ -426,8 +426,12 @@ module.exports = [
 				"defaultValue": [],
 				"options": [
 					{
-						"label": "Puts favorite teams on your timeline",
+						"label": "Put favorite teams on your timeline",
 						"value": "timelineSubscribe"
+					},
+					{
+						"label": "Subscribe to all playoff games on your timeline",
+						"value": "playoffSubscribe"
 					}
 				]
 			}
