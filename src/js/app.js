@@ -639,7 +639,6 @@ function getDateObj (game) {
 
 	// Hacky solution to get around poor timezone support
 	var hourWithOffset = givenHour + 3 + (7 - ((new Date()).getTimezoneOffset()/60));
-	console.log((new Date()).getTimezoneOffset());
 	var d = new Date(parseInt(dateList[0]), parseInt(dateList[1])-1, parseInt(dateList[2])-1, hourWithOffset, givenMinute);
 	d.setTime( d.getTime() - (parseInt(offset) * 60 * 60 * 1000) );
 // 	var newDate = new Date(parseInt(dateString[0]), parseInt(dateString[1]),
