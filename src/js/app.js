@@ -638,7 +638,8 @@ function getDateObj (game) {
 	var givenMinute = parseInt(givenTime.split(':')[1]);
 
 	// Hacky solution to get around poor timezone support
-	var hourWithOffset = givenHour + 1 + (7 - ((new Date()).getTimezoneOffset()/60));
+	var hourWithOffset = givenHour + 3 + (7 - ((new Date()).getTimezoneOffset()/60));
+	console.log((new Date()).getTimezoneOffset());
 	var d = new Date(parseInt(dateList[0]), parseInt(dateList[1])-1, parseInt(dateList[2])-1, hourWithOffset, givenMinute);
 	d.setTime( d.getTime() - (parseInt(offset) * 60 * 60 * 1000) );
 // 	var newDate = new Date(parseInt(dateString[0]), parseInt(dateString[1]),
@@ -651,7 +652,7 @@ function getLocalTime (game) {
 	var newDate = getDateObj(game);
 	
 	var minutes = newDate.getMinutes().toString();
-	var ampm = newDate.getHours() > 12 ? 'PM' : 'AM';
+	var ampm = newDate.getHours() >= 12 ? 'PM' : 'AM';
 	var hours = newDate.getHours() > 12 ? (newDate.getHours() % 12).toString() : newDate.getHours().toString();
 	return hours + ':' + (minutes.length > 1 ? minutes : ('0' + minutes)) + ' ' + ampm;
 }
